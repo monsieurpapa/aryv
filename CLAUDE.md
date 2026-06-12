@@ -39,8 +39,21 @@ pnpm dev                  # api + pms + tower in parallel
 pnpm dev:api / dev:pms / dev:tower
 pnpm db:generate          # drizzle-kit generate (migrations)
 pnpm db:push              # push schema to Supabase
+pnpm --filter @aryv/db seed   # create the 24 rooms (idempotent)
 pnpm typecheck
 ```
+
+## Local development database
+
+A Docker Postgres works instead of Supabase for local work:
+
+```bash
+docker start aryv-test-pg   # or first time:
+docker run -d --name aryv-test-pg -e POSTGRES_PASSWORD=aryv -e POSTGRES_DB=aryv -p 55432:5432 postgres:16-alpine
+# then: DATABASE_URL=postgresql://postgres:aryv@localhost:55432/aryv
+```
+
+Note: port 5173 is often taken by another project's dev server on this machine — Vite bumps the PMS to the next free port; check the dev server output.
 
 ## Deployment
 

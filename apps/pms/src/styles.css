@@ -1,0 +1,340 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #f4f5f7;
+  color: #1f2430;
+}
+
+.entete {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.25rem;
+  background: #14213d;
+  color: #fff;
+  flex-wrap: wrap;
+}
+
+.entete h1 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.entete .sous-titre {
+  color: #9db2d9;
+  font-size: 0.85rem;
+}
+
+.nav-dates {
+  display: flex;
+  gap: 0.4rem;
+  margin-left: auto;
+}
+
+.nav-dates button {
+  background: #233a66;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.nav-dates button:hover {
+  background: #2e4a80;
+}
+
+.legende {
+  display: flex;
+  gap: 1rem;
+  padding: 0.5rem 1.25rem;
+  font-size: 0.78rem;
+  color: #555;
+  flex-wrap: wrap;
+}
+
+.legende span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pastille {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.bandeau-erreur {
+  margin: 0.5rem 1.25rem;
+  padding: 0.6rem 1rem;
+  background: #fdecea;
+  color: #b3261e;
+  border: 1px solid #f5c6c2;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+/* --- Grille du calendrier --- */
+.calendrier {
+  margin: 0.5rem 1.25rem 2rem;
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid #e3e6ec;
+  border-radius: 10px;
+}
+
+.grille {
+  display: grid;
+  min-width: 980px;
+}
+
+.cellule {
+  border-bottom: 1px solid #eef0f4;
+  border-right: 1px solid #eef0f4;
+  min-height: 38px;
+  position: relative;
+}
+
+.cellule-entete {
+  position: sticky;
+  top: 0;
+  background: #fafbfc;
+  text-align: center;
+  font-size: 0.72rem;
+  padding: 0.35rem 0;
+  color: #555;
+  border-bottom: 2px solid #e3e6ec;
+}
+
+.cellule-entete .num {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1f2430;
+}
+
+.cellule-entete.aujourdhui {
+  background: #eaf1ff;
+}
+
+.cellule.aujourdhui {
+  background: #f5f9ff;
+}
+
+.ligne-etage {
+  grid-column: 1 / -1;
+  background: #f0f2f6;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5a6478;
+  padding: 0.3rem 0.75rem;
+  border-bottom: 1px solid #e3e6ec;
+}
+
+.cellule-chambre {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.6rem;
+  font-size: 0.85rem;
+  background: #fafbfc;
+  white-space: nowrap;
+}
+
+.cellule-chambre .numero {
+  font-weight: 600;
+}
+
+.cellule-chambre .type {
+  font-size: 0.7rem;
+  color: #8a93a6;
+}
+
+.btn-propre {
+  margin-left: auto;
+  border: none;
+  background: #fff3e0;
+  color: #b26a00;
+  font-size: 0.68rem;
+  border-radius: 5px;
+  padding: 0.15rem 0.4rem;
+  cursor: pointer;
+}
+
+.cellule-jour {
+  cursor: pointer;
+}
+
+.cellule-jour:hover {
+  background: #f0f4fa;
+}
+
+.barre {
+  position: absolute;
+  inset: 5px 1px;
+  border-radius: 5px;
+  font-size: 0.7rem;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding: 0 0.4rem;
+  overflow: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.barre.en_attente { background: #f59e0b; }
+.barre.confirmee { background: #3b82f6; }
+.barre.en_cours { background: #16a34a; }
+.barre.terminee { background: #9ca3af; }
+
+.barre.suite {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  left: 0;
+}
+
+/* Pastilles de statut de chambre */
+.pastille.libre { background: #16a34a; }
+.pastille.reservee { background: #3b82f6; }
+.pastille.occupee { background: #dc2626; }
+.pastille.a_nettoyer { background: #f59e0b; }
+
+/* --- Modale / panneau --- */
+.voile {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 20, 35, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modale {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  width: min(440px, 92vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 18px 50px rgba(10, 15, 30, 0.25);
+}
+
+.modale h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
+}
+
+.modale .contexte {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.champ {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.champ label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #444;
+}
+
+.champ input,
+.champ select {
+  border: 1px solid #d4d9e2;
+  border-radius: 7px;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+}
+
+.rangee {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.rangee .champ {
+  flex: 1;
+}
+
+.boutons {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+button.btn-principal,
+button.btn-danger,
+button.btn-secondaire {
+  border: none;
+  border-radius: 7px;
+  padding: 0.5rem 1rem;
+  font-size: 0.88rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.btn-principal { background: #14213d; color: #fff; }
+.btn-principal:hover { background: #1d2f57; }
+.btn-danger { background: #fdecea; color: #b3261e; }
+.btn-danger:hover { background: #fad6d2; }
+.btn-secondaire { background: #eef0f4; color: #333; }
+.btn-secondaire:hover { background: #e2e5ec; }
+
+.erreur-formulaire {
+  color: #b3261e;
+  font-size: 0.82rem;
+  margin-top: 0.5rem;
+}
+
+.detail dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.3rem 1rem;
+  font-size: 0.9rem;
+  margin: 0.75rem 0;
+}
+
+.detail dt {
+  color: #6b7280;
+}
+
+.detail dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+.badge {
+  display: inline-block;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  padding: 0.15rem 0.6rem;
+  color: #fff;
+}
+
+.badge.en_attente { background: #f59e0b; }
+.badge.confirmee { background: #3b82f6; }
+.badge.en_cours { background: #16a34a; }
+.badge.terminee { background: #9ca3af; }
+.badge.annulee { background: #6b7280; }
+
+.chargement {
+  padding: 3rem;
+  text-align: center;
+  color: #6b7280;
+}
