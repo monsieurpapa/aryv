@@ -5,8 +5,10 @@ night club au sous-sol · restaurant au rez-de-chaussée · 24 chambres en court
 
 ## Applications
 
-- **PMS ARYV** (`apps/pms`) — logiciel de gestion hôtelière interne : calendrier des chambres,
-  tarifs (nuitée / journée / multi-nuits), tableau de ménage, caisse et rapports.
+- **PMS ARYV** (`apps/pms`) — logiciel de gestion hôtelière interne. Disponible (v1) : calendrier
+  des chambres sur 14 jours par étage, réservations nuitée / journée (« repos ») / multi-nuits
+  avec montant calculé automatiquement, confirmation / check-in / check-out / annulation, et
+  marquage ménage. À venir : tableau de ménage dédié, caisse et rapports.
 - **ARYV Tower** (`apps/tower`) — application publique de réservation : chambres, tables du
   restaurant, entrées du club, événements de la terrasse. Paiement Mobile Money, réservation WhatsApp.
 - **API** (`apps/api`) — backend Express commun.
@@ -17,6 +19,7 @@ night club au sous-sol · restaurant au rez-de-chaussée · 24 chambres en court
 pnpm install
 cp .env.example .env   # remplir Supabase + DATABASE_URL
 pnpm db:push
+pnpm --filter @aryv/db seed   # créer les 24 chambres (idempotent)
 pnpm dev
 ```
 

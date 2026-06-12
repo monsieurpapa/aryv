@@ -31,6 +31,17 @@ pnpm monorepo:
 - Mobile Money in v1 is a manually entered transaction reference; do not integrate provider APIs yet.
 - Smart-lock PIN issuing (TTLock) is phase 2 — keep a `pin_codes` seam in the schema but no API integration yet.
 
+## API (apps/api, port 3001)
+
+| Method | Path | Behavior |
+|---|---|---|
+| GET | `/api/sante` | Health check |
+| GET | `/api/chambres` | All rooms, ordered by floor then number |
+| PATCH | `/api/chambres/:id/statut` | Set room status (used by housekeeping "Propre") |
+| GET | `/api/reservations?debut&fin` | Reservations (with client) overlapping the ISO range; defaults to −7/+28 days; excludes `annulee` |
+| POST | `/api/reservations` | Create booking; finds-or-creates client by normalized phone; **409** if the room is taken on the period |
+| PATCH | `/api/reservations/:id/statut` | Status transition; **400** if not allowed by the state machine; updates the room status as a side effect |
+
 ## Commands
 
 ```bash
