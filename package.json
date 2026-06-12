@@ -1,0 +1,20 @@
+{
+  "name": "aryv-logistics",
+  "private": true,
+  "version": "0.1.0",
+  "description": "ARYV Tower (Goma, RDC) — PMS ARYV (gestion hôtelière) + application de réservation unifiée",
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "dev:api": "pnpm --filter @aryv/api dev",
+    "dev:pms": "pnpm --filter @aryv/pms dev",
+    "dev:tower": "pnpm --filter @aryv/tower dev",
+    "build": "pnpm -r build",
+    "db:generate": "pnpm --filter @aryv/db generate",
+    "db:push": "pnpm --filter @aryv/db push",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
