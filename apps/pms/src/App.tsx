@@ -3,11 +3,14 @@ import type { ChambreDTO, ReservationDTO } from "@aryv/shared";
 import { api } from "./api";
 import { ajouterJours, debutDuJour } from "./dates";
 import { Calendrier } from "./Calendrier";
+import { Menage } from "./Menage";
 import { ModalReservation } from "./ModalReservation";
 import { PanneauDetail } from "./PanneauDetail";
 import { STATUT_CHAMBRE } from "./etiquettes";
 
 const NB_JOURS = 14;
+
+type Vue = "calendrier" | "menage";
 
 type Selection =
   | { type: "creation"; chambre: ChambreDTO; jour: string }
@@ -15,6 +18,7 @@ type Selection =
   | null;
 
 export function App() {
+  const [vue, setVue] = useState<Vue>("calendrier");
   const [fenetreDebut, setFenetreDebut] = useState(() =>
     debutDuJour(ajouterJours(new Date(), -1)),
   );
@@ -67,41 +71,61 @@ export function App() {
     <>
       <header className="entete">
         <div>
-          <h1>PMS ARYV — Calendrier des chambres</h1>
+          <h1>
+            PMS ARYV — {vue === "calendrier" ? "Calendrier des chambres" : "Ménage"}
+          </h1>
           <span className="sous-titre">ARYV Tower · Goma</span>
         </div>
-        <nav className="nav-dates">
-          <button onClick={() => setFenetreDebut((d) => ajouterJours(d, -7))}>
-            ◀ Semaine
+        <nav className="nav-vues">
+          <button
+            className={vue === "calendrier" ? "actif" : ""}
+            onClick={() => setVue("calendrier")}
+          >
+            Calendrier
           </button>
           <button
-            onClick={() => setFenetreDebut(debutDuJour(ajouterJours(new Date(), -1)))}
+            className={vue === "menage" ? "actif" : ""}
+            onClick={() => setVue("menage")}
           >
-            Aujourd&apos;hui
-          </button>
-          <button onClick={() => setFenetreDebut((d) => ajouterJours(d, 7))}>
-            Semaine ▶
+            Ménage
           </button>
         </nav>
+        {vue === "calendrier" && (
+          <nav className="nav-dates">
+            <button onClick={() => setFenetreDebut((d) => ajouterJours(d, -7))}>
+              ◀ Semaine
+            </button>
+            <button
+              onClick={() => setFenetreDebut(debutDuJour(ajouterJours(new Date(), -1)))}
+            >
+              Aujourd&apos;hui
+            </button>
+            <button onClick={() => setFenetreDebut((d) => ajouterJours(d, 7))}>
+              Semaine ▶
+            </button>
+          </nav>
+        )}
       </header>
 
-      <div className="legende">
-        {(Object.keys(STATUT_CHAMBRE) as (keyof typeof STATUT_CHAMBRE)[]).map(
-          (statut) => (
-            <span key={statut}>
-              <span className={`pastille ${statut}`} />
-              {STATUT_CHAMBRE[statut]}
-            </span>
-          ),
-        )}
-        <span>· Cliquer sur une case vide pour réserver</span>
-      </div>
+      {vue === "calendrier" && (
+        <div className="legende">
+          {(Object.keys(STATUT_CHAMBRE) as (keyof typeof STATUT_CHAMBRE)[]).map(
+            (statut) => (
+              <span key={statut}>
+                <span className={`pastille ${statut}`} />
+                {STATUT_CHAMBRE[statut]}
+              </span>
+            ),
+          )}
+          <span>· Cliquer sur une case vide pour réserver</span>
+        </div>
+      )}
 
       {erreur && <div className="bandeau-erreur">{erreur}</div>}
 
       {chargement ? (
-        <div className="chargement">Chargement du calendrier…</div>
-      ) : (
+        <div className="chargement">Chargement…</div>
+      ) : vue === "calendrier" ? (
         <Calendrier
           chambres={chambres}
           reservations={reservations}
@@ -111,6 +135,12 @@ export function App() {
             setSelection({ type: "creation", chambre, jour })
           }
           onOuvrir={(reservation) => setSelection({ type: "detail", reservation })}
+          onMarquerPropre={marquerPropre}
+        />
+      ) : (
+        <Menage
+          chambres={chambres}
+          reservations={reservations}
           onMarquerPropre={marquerPropre}
         />
       )}

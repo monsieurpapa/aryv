@@ -29,10 +29,34 @@ body {
   font-size: 0.85rem;
 }
 
-.nav-dates {
+.nav-vues {
   display: flex;
   gap: 0.4rem;
   margin-left: auto;
+}
+
+.nav-vues button {
+  background: #233a66;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.4rem 0.9rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.nav-vues button:hover {
+  background: #2e4a80;
+}
+
+.nav-vues button.actif {
+  background: #fff;
+  color: #14213d;
+}
+
+.nav-dates {
+  display: flex;
+  gap: 0.4rem;
 }
 
 .nav-dates button {
@@ -337,4 +361,116 @@ button.btn-secondaire {
   padding: 3rem;
   text-align: center;
   color: #6b7280;
+}
+
+/* --- Vue ménage --- */
+.menage {
+  padding: 0.75rem 1.25rem 2rem;
+}
+
+.menage-resume {
+  background: #fff3e0;
+  color: #b26a00;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-align: center;
+  margin-bottom: 1.25rem;
+}
+
+.menage-resume.tout-propre {
+  background: #e7f7ee;
+  color: #16a34a;
+}
+
+.menage-etage {
+  margin-bottom: 1.5rem;
+}
+
+.menage-etage h2 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #5a6478;
+  margin: 0 0 0.6rem;
+}
+
+.menage-cartes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 0.85rem;
+}
+
+.carte-chambre {
+  background: #fff;
+  border: 1px solid #e3e6ec;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.carte-chambre.a_nettoyer {
+  border-color: #f59e0b;
+  background: #fffaf0;
+}
+
+.carte-tete {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.carte-tete .numero {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.carte-tete .type {
+  font-size: 0.75rem;
+  color: #8a93a6;
+}
+
+.badge-statut {
+  align-self: flex-start;
+  display: inline-block;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.7rem;
+  color: #fff;
+}
+
+.badge-statut.libre { background: #16a34a; }
+.badge-statut.reservee { background: #3b82f6; }
+.badge-statut.occupee { background: #dc2626; }
+.badge-statut.a_nettoyer { background: #f59e0b; }
+
+.badge-depart {
+  align-self: flex-start;
+  display: inline-block;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.15rem 0.6rem;
+  background: #fee2e2;
+  color: #b3261e;
+}
+
+.btn-propre-grand {
+  border: none;
+  border-radius: 8px;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #16a34a;
+  color: #fff;
+}
+
+.btn-propre-grand.confirmer {
+  background: #b3261e;
 }
