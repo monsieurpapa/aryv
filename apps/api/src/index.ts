@@ -2,9 +2,26 @@ import express from "express";
 import cors from "cors";
 import { chambresRouter } from "./routes/chambres.js";
 import { reservationsRouter } from "./routes/reservations.js";
+import { utilisateursRouter } from "./routes/utilisateurs.js";
+import { auditLogRouter } from "./routes/audit-log.js";
 
 const app = express();
-app.use(cors());
+
+// Liste blanche d'origines (remplace le joker précédent) ; CORS_ALLOWED_ORIGINS
+// est une liste séparée par des virgules. Sans configuration, n'autorise que
+// les origines de dev par défaut (PMS sur 5173).
+const originsAutorisees = (
+  process.env.CORS_ALLOWED_ORIGINS ?? "http://localhost:5173"
+)
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin: originsAutorisees,
+  }),
+);
 app.use(express.json());
 
 app.get("/api/sante", (_req, res) => {
@@ -13,6 +30,8 @@ app.get("/api/sante", (_req, res) => {
 
 app.use("/api/chambres", chambresRouter);
 app.use("/api/reservations", reservationsRouter);
+app.use("/api/utilisateurs", utilisateursRouter);
+app.use("/api/audit-log", auditLogRouter);
 
 const port = Number(process.env.PORT ?? 3001);
 app.listen(port, () => {

@@ -38,6 +38,28 @@ export interface ReservationDTO {
   };
 }
 
+// Trombinoscope du personnel (gérant uniquement).
+export interface UtilisateurDTO {
+  id: string;
+  nom: string;
+  role: string;
+  creeLe: string; // ISO 8601
+}
+
+// Journal d'audit (D9) — insert-only, exposé en lecture au gérant uniquement.
+export interface AuditLogDTO {
+  id: number;
+  action: string;
+  entiteType: string;
+  entiteId: number | null;
+  details: Record<string, unknown> | null;
+  horodatage: string; // ISO 8601
+  utilisateur: {
+    nom: string;
+    role: string;
+  };
+}
+
 /** Formate un montant USD pour l'affichage (fr-CD). */
 export function formaterMontant(montant: number | string): string {
   return new Intl.NumberFormat("fr-CD", {

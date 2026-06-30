@@ -326,6 +326,166 @@ button.btn-secondaire {
   margin-top: 0.5rem;
 }
 
+.succes-formulaire {
+  color: #1d6a3a;
+  font-size: 0.82rem;
+  margin-top: 0.5rem;
+}
+
+.pin-pad {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  margin: 1rem 0;
+}
+
+.pin-progres {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.pin-progres-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.pin-case {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid #14213d;
+  background: transparent;
+}
+
+.pin-case.rempli {
+  background: #14213d;
+}
+
+.pin-touches {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 280px;
+}
+
+.touche-pin {
+  height: 64px;
+  border: none;
+  border-radius: 10px;
+  background: #eef0f4;
+  color: #14213d;
+  font-size: 1.4rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.touche-pin:hover:not(:disabled) {
+  background: #e2e5ec;
+}
+
+.touche-pin:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.touche-effacer {
+  font-size: 1.2rem;
+  background: #fdecea;
+  color: #b3261e;
+}
+
+.equipe {
+  padding: 1.5rem;
+}
+
+.equipe h2 {
+  font-size: 0.95rem;
+  margin: 0 0 0.75rem;
+}
+
+.equipe h2:not(:first-child) {
+  margin-top: 2rem;
+}
+
+.badge-pin-confirme {
+  display: inline-block;
+  margin-left: 0.6rem;
+  font-size: 0.75rem;
+  color: #b6c6ee;
+}
+
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #14213d;
+  color: #fff;
+  padding: 0.65rem 1.1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  box-shadow: 0 8px 24px rgba(10, 15, 30, 0.3);
+  z-index: 60;
+}
+
+.journal-audit {
+  padding: 1.5rem;
+}
+
+.journal-filtres {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.table-journal {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #e3e6ec;
+  border-radius: 10px;
+  font-size: 0.85rem;
+}
+
+.table-journal th,
+.table-journal td {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #eef0f4;
+}
+
+.table-journal th {
+  background: #fafbfc;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5a6478;
+}
+
+.journal-pagination {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+}
+
+.formulaire-equipe {
+  max-width: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
 .detail dl {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -473,4 +633,30 @@ button.btn-secondaire {
 
 .btn-propre-grand.confirmer {
   background: #b3261e;
+}
+
+.ecran-connexion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #f4f5f8;
+}
+
+.formulaire-connexion {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  width: 320px;
+}
+
+.formulaire-connexion h1 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.formulaire-connexion .btn-principal {
+  width: 100%;
+  margin-top: 0.5rem;
 }

@@ -6,6 +6,7 @@ import {
   timestamp,
   numeric,
   pgEnum,
+  jsonb,
 } from "drizzle-orm/pg-core";
 
 // Statuts du cycle de vie d'une chambre : libre → reservee → occupee → a_nettoyer → libre
@@ -84,11 +85,52 @@ export const codesPin = pgTable("codes_pin", {
 });
 
 // Profils du personnel — l'id correspond à l'UUID Supabase Auth.
+// pinHash : code PIN à 4 chiffres (bcrypt), null jusqu'à la première
+// configuration (D12 — la première action protégée par PIN déclenche la
+// configuration au lieu d'une erreur). lockedUntil : verrouillage après
+// échecs répétés (D6), suivi par utilisateur (pas par appareil partagé).
 export const utilisateurs = pgTable("utilisateurs", {
   id: text("id").primaryKey(), // UUID Supabase Auth
   nom: text("nom").notNull(),
   role: roleUtilisateur("role").notNull(),
+  pinHash: text("pin_hash"),
+  echecsPinConsecutifs: integer("echecs_pin_consecutifs").notNull().default(0),
+  verrouilleJusqua: timestamp("verrouille_jusqua"),
   creeLe: timestamp("cree_le").notNull().defaultNow(),
+});
+
+// Journal d'audit — insert-only (aucune route de mise à jour/suppression ne
+// doit jamais exister, même pour le gérant : un journal modifiable n'est pas
+// un journal). Toujours inséré dans la même transaction que la mutation
+// qu'il enregistre (fail-closed : si l'audit échoue, la mutation échoue).
+export const auditLog = pgTable("audit_log", {
+  id: serial("id").primaryKey(),
+  utilisateurId: text("utilisateur_id")
+    .notNull()
+    .references(() => utilisateurs.id),
+  action: text("action").notNull(), // ex: "reservation.creer", "chambre.statut"
+  entiteType: text("entite_type").notNull(), // "reservation" | "chambre" | "utilisateur"
+  entiteId: integer("entite_id"),
+  details: jsonb("details"),
+  horodatage: timestamp("horodatage").notNull().defaultNow(),
+});
+
+// Archive du journal d'audit (D15) — destination du job mensuel de
+// rétention (90 jours, voir storage.archiverAuditLog). Même forme que
+// audit_log : on déplace les lignes, on ne les recrée pas sous une autre
+// structure, pour que l'historique archivé reste interrogeable tel quel.
+export const auditLogArchive = pgTable("audit_log_archive", {
+  id: serial("id").primaryKey(),
+  auditLogId: integer("audit_log_id").notNull(),
+  utilisateurId: text("utilisateur_id")
+    .notNull()
+    .references(() => utilisateurs.id),
+  action: text("action").notNull(),
+  entiteType: text("entite_type").notNull(),
+  entiteId: integer("entite_id"),
+  details: jsonb("details"),
+  horodatage: timestamp("horodatage").notNull(),
+  archiveLe: timestamp("archive_le").notNull().defaultNow(),
 });
 
 export type Chambre = typeof chambres.$inferSelect;
@@ -96,3 +138,6 @@ export type Client = typeof clients.$inferSelect;
 export type Reservation = typeof reservations.$inferSelect;
 export type NouvelleReservation = typeof reservations.$inferInsert;
 export type Utilisateur = typeof utilisateurs.$inferSelect;
+export type AuditLog = typeof auditLog.$inferSelect;
+export type NouvelAuditLog = typeof auditLog.$inferInsert;
+export type AuditLogArchive = typeof auditLogArchive.$inferSelect;

@@ -11,7 +11,9 @@
     "build": "pnpm -r build",
     "db:generate": "pnpm --filter @aryv/db generate",
     "db:push": "pnpm --filter @aryv/db push",
-    "typecheck": "pnpm -r typecheck"
+    "db:archiver-audit-log": "pnpm --filter @aryv/db archiver-audit-log",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test"
   },
   "engines": {
     "node": ">=20"

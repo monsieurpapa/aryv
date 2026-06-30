@@ -1,13 +1,15 @@
 import { Router } from "express";
 import { storage, ConflitReservation } from "@aryv/db";
 import { normaliserTelephone, type ReservationDTO } from "@aryv/shared";
+import { legacyAuth } from "../middleware/auth.js";
 
 export const reservationsRouter = Router();
 
 const JOUR_MS = 24 * 60 * 60 * 1000;
 
 // Plage par défaut du calendrier : 7 jours en arrière, 28 en avant.
-reservationsRouter.get("/", async (req, res) => {
+// Menage exclu : cet endpoint expose montant + téléphone client.
+reservationsRouter.get("/", legacyAuth("gerant", "reception"), async (req, res) => {
   const maintenant = Date.now();
   const debut = req.query.debut
     ? new Date(String(req.query.debut))
@@ -39,7 +41,7 @@ reservationsRouter.get("/", async (req, res) => {
   res.json(dto);
 });
 
-reservationsRouter.post("/", async (req, res) => {
+reservationsRouter.post("/", legacyAuth("gerant", "reception"), async (req, res) => {
   const { telephone, nom, chambreId, typeSejour, arrivee, depart, montant, refPaiement } =
     req.body;
   if (!telephone || !chambreId || !typeSejour || !arrivee || !depart || !montant) {
@@ -65,15 +67,18 @@ reservationsRouter.post("/", async (req, res) => {
     nom,
   );
   try {
-    const reservation = await storage.creerReservation({
-      chambreId: Number(chambreId),
-      clientId: client.id,
-      typeSejour,
-      arrivee: dateArrivee,
-      depart: dateDepart,
-      montant: String(montant),
-      refPaiement: refPaiement || null,
-    });
+    const reservation = await storage.creerReservation(
+      {
+        chambreId: Number(chambreId),
+        clientId: client.id,
+        typeSejour,
+        arrivee: dateArrivee,
+        depart: dateDepart,
+        montant: String(montant),
+        refPaiement: refPaiement || null,
+      },
+      req.utilisateur?.id,
+    );
     res.status(201).json(reservation);
   } catch (err) {
     if (err instanceof ConflitReservation) {
@@ -92,22 +97,35 @@ const TRANSITIONS: Record<string, string[]> = {
   annulee: [],
 };
 
-reservationsRouter.patch("/:id/statut", async (req, res) => {
-  const { statut } = req.body;
-  const actuelle = await storage.obtenirReservation(Number(req.params.id));
-  if (!actuelle) {
-    res.status(404).json({ erreur: "Réservation introuvable" });
-    return;
-  }
-  if (!TRANSITIONS[actuelle.statut]?.includes(statut)) {
-    res.status(400).json({
-      erreur: `Transition impossible : ${actuelle.statut} → ${statut}`,
-    });
-    return;
-  }
-  const reservation = await storage.changerStatutReservation(
-    Number(req.params.id),
-    statut,
-  );
-  res.json(reservation);
-});
+reservationsRouter.patch(
+  "/:id/statut",
+  legacyAuth("gerant", "reception"),
+  async (req, res) => {
+    const { statut } = req.body;
+    // Annulation = gérant uniquement (D4) — empêche le scénario créer-puis-
+    // annuler pour détourner un paiement encaissé en espèces/Mobile Money.
+    // Ne s'applique qu'une fois AUTH_ENFORCED actif (req.utilisateur défini) ;
+    // pendant la fenêtre de bascule, le comportement reste inchangé (D16).
+    if (statut === "annulee" && req.utilisateur && req.utilisateur.role !== "gerant") {
+      res.status(403).json({ erreur: "Seul le gérant peut annuler une réservation" });
+      return;
+    }
+    const actuelle = await storage.obtenirReservation(Number(req.params.id));
+    if (!actuelle) {
+      res.status(404).json({ erreur: "Réservation introuvable" });
+      return;
+    }
+    if (!TRANSITIONS[actuelle.statut]?.includes(statut)) {
+      res.status(400).json({
+        erreur: `Transition impossible : ${actuelle.statut} → ${statut}`,
+      });
+      return;
+    }
+    const reservation = await storage.changerStatutReservation(
+      Number(req.params.id),
+      statut,
+      req.utilisateur?.id,
+    );
+    res.json(reservation);
+  },
+);

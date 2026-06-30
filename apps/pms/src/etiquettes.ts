@@ -40,3 +40,17 @@ export const ACTIONS: Record<
   terminee: [],
   annulee: [],
 };
+
+/** Libellés français des rôles du personnel (utilisateurs.role). */
+export const ROLE_UTILISATEUR: Record<string, string> = {
+  gerant: "Gérant",
+  reception: "Réception",
+  menage: "Ménage",
+};
+
+/** Libellés français des actions du journal d'audit (clé = colonne `action`). */
+export const ACTION_AUDIT: Record<string, string> = {
+  "chambre.statut": "Statut chambre modifié",
+  "reservation.creer": "Réservation créée",
+  "reservation.statut": "Statut réservation modifié",
+};
