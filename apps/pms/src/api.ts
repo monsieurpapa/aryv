@@ -1,6 +1,7 @@
 import type {
   AuditLogDTO,
   ChambreDTO,
+  RapportRecettesDTO,
   ReservationDTO,
   StatutChambre,
   StatutReservation,
@@ -106,6 +107,12 @@ export const api = {
     }),
 
   listerUtilisateurs: () => requete<UtilisateurDTO[]>("/api/utilisateurs"),
+
+  // Rapport de recettes (gérant uniquement).
+  listerRapport: (debut: string, fin: string) =>
+    requete<RapportRecettesDTO>(
+      `/api/rapports?debut=${debut}&fin=${fin}`,
+    ),
 
   // Journal d'audit (D14 — gérant uniquement, plage de dates paginée).
   listerAuditLog: (debut: string, fin: string, page: number) =>

@@ -1,7 +1,7 @@
 import { drizzle, type PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import bcrypt from "bcryptjs";
-import { and, asc, desc, eq, gt, inArray, lt, ne } from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, inArray, lt, ne } from "drizzle-orm";
 import * as schema from "./schema.js";
 
 const ECHECS_AVANT_VERROUILLAGE = 3;
@@ -322,6 +322,39 @@ export const storage = {
           gt(schema.reservations.depart, debut),
         ),
       );
+  },
+
+  // --- Rapports de recettes (gérant uniquement) ---
+
+  /**
+   * Toutes les réservations non annulées dont l'arrivée se situe dans
+   * [debut, fin), avec chambre et client. Les agrégats (total encaissé,
+   * par étage…) sont calculés dans la route pour garder cette couche simple.
+   */
+  async rapportRecettes(debut: Date, fin: Date) {
+    return db()
+      .select({
+        reservation: schema.reservations,
+        chambre: {
+          numero: schema.chambres.numero,
+          etage: schema.chambres.etage,
+        },
+        client: {
+          telephone: schema.clients.telephone,
+          nom: schema.clients.nom,
+        },
+      })
+      .from(schema.reservations)
+      .innerJoin(schema.chambres, eq(schema.reservations.chambreId, schema.chambres.id))
+      .innerJoin(schema.clients, eq(schema.reservations.clientId, schema.clients.id))
+      .where(
+        and(
+          ne(schema.reservations.statut, "annulee"),
+          gte(schema.reservations.arrivee, debut),
+          lt(schema.reservations.arrivee, fin),
+        ),
+      )
+      .orderBy(desc(schema.reservations.arrivee));
   },
 
   // --- Journal d'audit (D9, insert-only — voir enregistrerAudit ci-dessus) ---

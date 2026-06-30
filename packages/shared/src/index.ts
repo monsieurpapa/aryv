@@ -60,6 +60,26 @@ export interface AuditLogDTO {
   };
 }
 
+// Rapport de recettes (gérant uniquement).
+export interface LigneRapportDTO {
+  id: number;
+  chambre: { numero: string; etage: number };
+  client: { telephone: string; nom: string | null };
+  typeSejour: TypeSejour;
+  statut: StatutReservation;
+  arrivee: string; // ISO 8601
+  depart: string; // ISO 8601
+  montant: string;
+  refPaiement: string | null;
+}
+
+export interface RapportRecettesDTO {
+  totalEncaisse: string; // séjours terminés uniquement
+  totalAttendu: string;  // tous non-annulés
+  parEtage: { etage: number; montant: string; nb: number }[];
+  lignes: LigneRapportDTO[];
+}
+
 /** Formate un montant USD pour l'affichage (fr-CD). */
 export function formaterMontant(montant: number | string): string {
   return new Intl.NumberFormat("fr-CD", {

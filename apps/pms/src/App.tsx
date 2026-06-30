@@ -11,11 +11,12 @@ import { Login } from "./Login";
 import { PinConfirm, type ResultatPin } from "./PinConfirm";
 import { Equipe } from "./Equipe";
 import { JournalAudit } from "./JournalAudit";
+import { Rapports } from "./Rapports";
 import { deconnecter, supabase } from "./auth";
 
 const NB_JOURS = 14;
 
-type Vue = "calendrier" | "menage" | "equipe" | "journal";
+type Vue = "calendrier" | "menage" | "equipe" | "journal" | "rapports";
 
 const FMT_HEURE = new Intl.DateTimeFormat("fr-FR", {
   hour: "2-digit",
@@ -169,6 +170,7 @@ export function App() {
                 menage: "Ménage",
                 equipe: "Équipe",
                 journal: "Journal d'audit",
+                rapports: "Rapports & Caisse",
               }[vue]
             }
           </h1>
@@ -207,6 +209,14 @@ export function App() {
               onClick={() => setVue("journal")}
             >
               Journal
+            </button>
+          )}
+          {role === "gerant" && (
+            <button
+              className={vue === "rapports" ? "actif" : ""}
+              onClick={() => setVue("rapports")}
+            >
+              Rapports
             </button>
           )}
           <button className="btn-secondaire" onClick={() => deconnecter()}>
@@ -268,6 +278,8 @@ export function App() {
         />
       ) : vue === "journal" ? (
         <JournalAudit />
+      ) : vue === "rapports" ? (
+        <Rapports />
       ) : (
         <Equipe />
       )}
