@@ -69,3 +69,13 @@ Note: port 5173 is often taken by another project's dev server on this machine â
 ## Deployment
 
 API on Railway/Render; PostgreSQL on Supabase; frontends as static builds (Vercel/Netlify or served by the API).
+
+## Git workflow
+
+**Always use feature branches â€” never commit directly to `main`.**
+
+1. Before starting any piece of work: `git checkout -b feat/<short-slug>` (or `fix/`, `chore/` as appropriate)
+2. Commit on the branch, then `git push -u origin <branch>`
+3. Open a PR into `main` with `gh pr create`
+
+Branch naming: `feat/room-calendar`, `fix/pin-confirm-typo`, `chore/deps-update`, etc.
