@@ -15,7 +15,7 @@ interface Props {
   onAnnuler: () => void;
 }
 
-type Etape = "confirmer" | "configurer" | "verrouille";
+type Etape = "confirmer" | "configurer" | "configurer-confirmer" | "verrouille";
 
 /**
  * Modale PIN-switch (D3/D6/D12) : confirme l'identité de qui agit sur un
@@ -31,6 +31,7 @@ export function PinConfirm({ titre, onConfirme, onAnnuler }: Props) {
   // Incrémenté à chaque échec pour forcer le remontage de PinPad (vide les
   // 4 chiffres saisis) — plus simple que de synchroniser un état contrôlé.
   const [tentative, setTentative] = useState(0);
+  const [premierPin, setPremierPin] = useState<string | null>(null);
 
   async function confirmerCode(pin: string) {
     setErreur(null);
@@ -54,13 +55,24 @@ export function PinConfirm({ titre, onConfirme, onAnnuler }: Props) {
     }
   }
 
-  async function configurerCode(pin: string) {
+  function saisirPremierPin(pin: string) {
+    setPremierPin(pin);
+    setEtape("configurer-confirmer");
+    setTentative((t) => t + 1);
+  }
+
+  async function confirmerNouveauPin(pin: string) {
+    if (pin !== premierPin) {
+      setErreur("Les codes ne correspondent pas. Recommencez.");
+      setPremierPin(null);
+      setEtape("configurer");
+      setTentative((t) => t + 1);
+      return;
+    }
     setErreur(null);
     setEnvoiEnCours(true);
     try {
       await api.definirPin(pin);
-      // Le PIN qu'on vient de définir sert directement à autoriser l'action
-      // en attente — pas de second tour de saisie immédiat.
       const resultat = await onConfirme(pin);
       if (resultat !== "ok") {
         setErreur("Erreur inattendue");
@@ -117,7 +129,24 @@ export function PinConfirm({ titre, onConfirme, onAnnuler }: Props) {
             </p>
             <PinPad
               key={`configurer-${tentative}`}
-              onComplete={configurerCode}
+              onComplete={saisirPremierPin}
+              disabled={envoiEnCours}
+            />
+            {erreur && <p className="erreur-formulaire">{erreur}</p>}
+            <div className="boutons">
+              <button type="button" className="btn-secondaire" onClick={onAnnuler}>
+                Annuler
+              </button>
+            </div>
+          </div>
+        )}
+
+        {etape === "configurer-confirmer" && (
+          <div>
+            <p className="contexte">Confirmez votre code à 4 chiffres.</p>
+            <PinPad
+              key={`configurer-confirmer-${tentative}`}
+              onComplete={confirmerNouveauPin}
               disabled={envoiEnCours}
             />
             {erreur && <p className="erreur-formulaire">{erreur}</p>}

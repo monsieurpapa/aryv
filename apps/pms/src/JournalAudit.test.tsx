@@ -40,4 +40,25 @@ describe("JournalAudit", () => {
       expect(screen.getByText("Aucune entrée sur cette période.")).toBeTruthy(),
     );
   });
+
+  it("désactive 'Suivant' quand la page est incomplète (< 50 entrées)", async () => {
+    listerAuditLog.mockResolvedValue([
+      {
+        id: 1,
+        action: "chambre.statut",
+        entiteType: "chambre",
+        entiteId: 101,
+        details: null,
+        horodatage: "2026-06-24T08:00:00.000Z",
+        utilisateur: { nom: "Bob", role: "menage" },
+      },
+    ]);
+
+    render(<JournalAudit />);
+
+    await waitFor(() => expect(screen.getByText("Bob")).toBeTruthy());
+
+    const boutonSuivant = screen.getByRole("button", { name: /Suivant/ }) as HTMLButtonElement;
+    expect(boutonSuivant.disabled).toBe(true);
+  });
 });

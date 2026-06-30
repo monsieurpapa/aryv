@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { PinConfirm } from "./PinConfirm";
 
@@ -17,6 +17,10 @@ function taperPin(valeur: string) {
 }
 
 describe("PinConfirm", () => {
+  beforeEach(() => {
+    definirPin.mockClear();
+  });
+
   it("appelle onConfirme avec le code saisi", async () => {
     const onConfirme = vi.fn().mockResolvedValue("ok");
     render(<PinConfirm titre="Test" onConfirme={onConfirme} onAnnuler={vi.fn()} />);
@@ -35,7 +39,7 @@ describe("PinConfirm", () => {
     await waitFor(() => expect(screen.getByText("Code incorrect")).toBeTruthy());
   });
 
-  it("passe à la configuration quand onConfirme renvoie config_requise (D12)", async () => {
+  it("passe à la configuration (D12) : deux saisies identiques enregistrent le PIN", async () => {
     const onConfirme = vi.fn().mockResolvedValueOnce("config_requise").mockResolvedValueOnce("ok");
     definirPin.mockResolvedValue(undefined);
     render(<PinConfirm titre="Test" onConfirme={onConfirme} onAnnuler={vi.fn()} />);
@@ -48,9 +52,35 @@ describe("PinConfirm", () => {
 
     taperPin("5678");
 
+    await waitFor(() => expect(screen.getByText(/Confirmez/)).toBeTruthy());
+
+    taperPin("5678");
+
     await waitFor(() => expect(definirPin).toHaveBeenCalledWith("5678"));
-    // Le PIN qu'on vient de définir sert directement à autoriser l'action en attente.
     await waitFor(() => expect(onConfirme).toHaveBeenLastCalledWith("5678"));
+  });
+
+  it("redemande le code quand les deux saisies ne correspondent pas (D12)", async () => {
+    const onConfirme = vi.fn().mockResolvedValueOnce("config_requise");
+    definirPin.mockResolvedValue(undefined);
+    render(<PinConfirm titre="Test" onConfirme={onConfirme} onAnnuler={vi.fn()} />);
+
+    taperPin("1234");
+
+    await waitFor(() => expect(screen.getByText(/Première utilisation/)).toBeTruthy());
+
+    taperPin("5678");
+
+    await waitFor(() => expect(screen.getByText(/Confirmez/)).toBeTruthy());
+
+    taperPin("9999");
+
+    await waitFor(() =>
+      expect(screen.getByText(/Les codes ne correspondent pas/)).toBeTruthy(),
+    );
+    // Revient à l'étape "configurer"
+    expect(screen.getByText(/Première utilisation/)).toBeTruthy();
+    expect(definirPin).not.toHaveBeenCalled();
   });
 
   it("affiche le message de verrouillage sans pavé numérique (D6)", async () => {

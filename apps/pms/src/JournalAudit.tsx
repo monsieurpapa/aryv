@@ -4,6 +4,8 @@ import { api } from "./api";
 import { cleJour } from "./dates";
 import { ACTION_AUDIT, ROLE_UTILISATEUR } from "./etiquettes";
 
+const TAILLE_PAGE = 50;
+
 const FMT_HORODATAGE = new Intl.DateTimeFormat("fr-FR", {
   day: "2-digit",
   month: "2-digit",
@@ -136,7 +138,7 @@ export function JournalAudit() {
         <button
           className="btn-secondaire"
           onClick={() => setPage((p) => p + 1)}
-          disabled={chargement || lignes.length === 0}
+          disabled={chargement || lignes.length < TAILLE_PAGE}
         >
           Suivant ▶
         </button>
