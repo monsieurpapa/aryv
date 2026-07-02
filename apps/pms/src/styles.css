@@ -660,3 +660,139 @@ button.btn-secondaire {
   width: 100%;
   margin-top: 0.5rem;
 }
+
+/* --- Vue Rapports & Caisse --- */
+.rapports {
+  padding: 1.5rem;
+}
+
+.rapports-filtres {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.rapports-synthese {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1.75rem;
+}
+
+.carte-synthese {
+  background: #fff;
+  border: 1px solid #e3e6ec;
+  border-radius: 12px;
+  padding: 1.1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.carte-synthese .valeur {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: #14213d;
+}
+
+.carte-synthese .libelle {
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.carte-synthese.encaisse {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.carte-synthese.encaisse .valeur {
+  color: #16a34a;
+}
+
+.carte-synthese.attendu {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.carte-synthese.attendu .valeur {
+  color: #2563eb;
+}
+
+.rapports-section {
+  margin-bottom: 2rem;
+}
+
+.rapports-section h3 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #5a6478;
+  margin: 0 0 0.6rem;
+}
+
+.table-rapport {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #e3e6ec;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  overflow: hidden;
+}
+
+.table-rapport th,
+.table-rapport td {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #eef0f4;
+}
+
+.table-rapport th {
+  background: #fafbfc;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #5a6478;
+}
+
+.table-rapport .colonne-montant {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.table-rapport tr.statut-terminee td {
+  color: #6b7280;
+}
+
+.pastille-statut {
+  display: inline-block;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  padding: 0.15rem 0.6rem;
+  color: #fff;
+}
+
+.pastille-statut.en_attente { background: #f59e0b; }
+.pastille-statut.confirmee  { background: #3b82f6; }
+.pastille-statut.en_cours   { background: #16a34a; }
+.pastille-statut.terminee   { background: #9ca3af; }
+
+.etage-badge {
+  font-size: 0.72rem;
+  color: #8a93a6;
+}
+
+.telephone {
+  font-size: 0.75rem;
+  color: #8a93a6;
+}
+
+.ref-paiement {
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #374151;
+}

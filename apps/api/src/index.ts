@@ -4,6 +4,7 @@ import { chambresRouter } from "./routes/chambres.js";
 import { reservationsRouter } from "./routes/reservations.js";
 import { utilisateursRouter } from "./routes/utilisateurs.js";
 import { auditLogRouter } from "./routes/audit-log.js";
+import { rapportsRouter } from "./routes/rapports.js";
 
 const app = express();
 
@@ -32,6 +33,7 @@ app.use("/api/chambres", chambresRouter);
 app.use("/api/reservations", reservationsRouter);
 app.use("/api/utilisateurs", utilisateursRouter);
 app.use("/api/audit-log", auditLogRouter);
+app.use("/api/rapports", rapportsRouter);
 
 const port = Number(process.env.PORT ?? 3001);
 app.listen(port, () => {

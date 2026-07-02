@@ -41,6 +41,7 @@ pnpm monorepo:
 | GET | `/api/reservations?debut&fin` | Reservations (with client) overlapping the ISO range; defaults to −7/+28 days; excludes `annulee` |
 | POST | `/api/reservations` | Create booking; finds-or-creates client by normalized phone; **409** if the room is taken on the period |
 | PATCH | `/api/reservations/:id/statut` | Status transition; **400** if not allowed by the state machine; updates the room status as a side effect |
+| GET | `/api/rapports?debut&fin` | Revenue report (gérant only); defaults to current month; returns totals (encaissé/attendu), breakdown by floor, and full booking list |
 
 ## Commands
 

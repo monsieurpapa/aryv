@@ -30,8 +30,8 @@ export function JournalAudit() {
 
   function plageISO() {
     return {
-      debutISO: new Date(`${debut}T00:00:00`).toISOString(),
-      finISO: new Date(`${fin}T23:59:59.999`).toISOString(),
+      debutISO: new Date(`${debut}T00:00:00Z`).toISOString(),
+      finISO: new Date(`${fin}T23:59:59.999Z`).toISOString(),
     };
   }
 
