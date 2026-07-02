@@ -373,7 +373,7 @@ export const storage = {
       )
       .where(
         and(
-          gt(schema.auditLog.horodatage, debut),
+          gte(schema.auditLog.horodatage, debut),
           lt(schema.auditLog.horodatage, fin),
         ),
       )

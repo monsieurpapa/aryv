@@ -27,8 +27,8 @@ export function Rapports() {
     setErreur(null);
     setChargement(true);
     try {
-      const debutISO = new Date(`${debut}T00:00:00`).toISOString();
-      const finISO = new Date(`${fin}T23:59:59.999`).toISOString();
+      const debutISO = new Date(`${debut}T00:00:00Z`).toISOString();
+      const finISO = new Date(`${fin}T23:59:59.999Z`).toISOString();
       setRapport(await api.listerRapport(debutISO, finISO));
     } catch (err) {
       setErreur(err instanceof Error ? err.message : "Erreur inattendue");
@@ -97,7 +97,7 @@ export function Rapports() {
                   <tr>
                     <th>Étage</th>
                     <th>Séjours</th>
-                    <th className="colonne-montant">Montant</th>
+                    <th className="colonne-montant">Attendu</th>
                   </tr>
                 </thead>
                 <tbody>

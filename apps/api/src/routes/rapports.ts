@@ -5,17 +5,31 @@ import { requireAuth, requireRole } from "../middleware/auth.js";
 
 export const rapportsRouter = Router();
 
+function premierParam(v: unknown): string | undefined {
+  if (Array.isArray(v)) return String(v[0]);
+  if (typeof v === "string") return v;
+  return undefined;
+}
+
 function plage(req: import("express").Request) {
   const now = new Date();
-  const debut = req.query.debut
-    ? new Date(String(req.query.debut))
-    : new Date(now.getFullYear(), now.getMonth(), 1); // 1er du mois
-  const fin = req.query.fin ? new Date(String(req.query.fin)) : now;
+  const rawDebut = premierParam(req.query.debut);
+  const rawFin = premierParam(req.query.fin);
+  const debut = rawDebut ? new Date(rawDebut) : new Date(now.getFullYear(), now.getMonth(), 1);
+  const fin = rawFin ? new Date(rawFin) : now;
   return { debut, fin };
+}
+
+function datesValides(debut: Date, fin: Date): boolean {
+  return !isNaN(debut.getTime()) && !isNaN(fin.getTime());
 }
 
 rapportsRouter.get("/", requireAuth, requireRole("gerant"), async (req, res) => {
   const { debut, fin } = plage(req);
+  if (!datesValides(debut, fin)) {
+    res.status(400).json({ erreur: "Paramètres debut/fin invalides" });
+    return;
+  }
   const lignes = await storage.rapportRecettes(debut, fin);
 
   let totalEncaisse = 0;
