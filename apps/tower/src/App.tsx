@@ -536,13 +536,29 @@ export function App() {
         )}
 
         {etape === "recherche" && (
-          <EtapeRecherche
-            recherche={recherche}
-            today={today}
-            chargement={chargement}
-            onChange={setRecherche}
-            onSubmit={chercher}
-          />
+          <>
+            <EtapeRecherche
+              recherche={recherche}
+              today={today}
+              chargement={chargement}
+              onChange={setRecherche}
+              onSubmit={chercher}
+            />
+            <div className="tower-info-strip" aria-hidden="true">
+              <div className="tower-info-item">
+                <strong>Check-in</strong>
+                14h00
+              </div>
+              <div className="tower-info-item">
+                <strong>Check-out</strong>
+                10h00
+              </div>
+              <div className="tower-info-item">
+                <strong>Paiement</strong>
+                Mobile Money
+              </div>
+            </div>
+          </>
         )}
 
         {etape === "selection" && (
