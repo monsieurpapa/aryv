@@ -1,0 +1,413 @@
+/* ─── Variables ─────────────────────────────────────────────────────────── */
+:root {
+  --or: #c9a84c;
+  --or-fonce: #a07930;
+  --texte: #1a1a1a;
+  --texte-leger: #666;
+  --fond: #f5f3ef;
+  --fond-carte: #ffffff;
+  --bord: #e0ddd6;
+  --rouge: #c0392b;
+  --vert: #27ae60;
+  --rayon: 8px;
+  --ombre: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* ─── Reset ──────────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--fond);
+  color: var(--texte);
+  min-height: 100vh;
+}
+
+/* ─── Layout ─────────────────────────────────────────────────────────────── */
+.tower-app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.tower-header {
+  background: #1a1208;
+  color: #fff;
+  padding: 1.25rem 1rem;
+  text-align: center;
+}
+.tower-header-inner {
+  max-width: 600px;
+  margin: 0 auto;
+}
+.tower-logo {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--or);
+}
+.tower-tagline {
+  font-size: 0.82rem;
+  color: #bbb;
+  margin-top: 0.25rem;
+  letter-spacing: 0.02em;
+}
+
+.tower-main {
+  flex: 1;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem;
+  width: 100%;
+}
+
+.tower-footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.78rem;
+  color: var(--texte-leger);
+  border-top: 1px solid var(--bord);
+  margin-top: auto;
+}
+
+/* ─── Alerte ─────────────────────────────────────────────────────────────── */
+.tower-alerte {
+  background: #fdf2f0;
+  border: 1px solid #e8b4ac;
+  color: var(--rouge);
+  border-radius: var(--rayon);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+/* ─── Card ───────────────────────────────────────────────────────────────── */
+.tower-card {
+  background: var(--fond-carte);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  padding: 1.5rem;
+  box-shadow: var(--ombre);
+}
+
+.card-titre {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+.card-sous-titre {
+  color: var(--texte-leger);
+  font-size: 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
+/* ─── Formulaire ─────────────────────────────────────────────────────────── */
+.form-groupe {
+  margin-bottom: 1rem;
+}
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+.form-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  color: var(--texte);
+}
+.form-input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  font-size: 1rem;
+  color: var(--texte);
+  background: #fff;
+  transition: border-color 0.15s;
+}
+.form-input:focus {
+  outline: none;
+  border-color: var(--or);
+}
+.form-hint {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--texte-leger);
+  margin-top: 0.3rem;
+}
+
+/* ─── Radio groupe ───────────────────────────────────────────────────────── */
+.radio-groupe {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--bord);
+  border-radius: 999px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--texte-leger);
+}
+.radio-option input {
+  display: none;
+}
+.radio-option.actif {
+  border-color: var(--or);
+  color: var(--or-fonce);
+  background: #fdf8ed;
+  font-weight: 600;
+}
+
+/* ─── Boutons ────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--rayon);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  border: none;
+  text-decoration: none;
+}
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.btn-primaire {
+  background: var(--or);
+  color: #fff;
+}
+.btn-primaire:hover:not(:disabled) {
+  background: var(--or-fonce);
+}
+.btn-secondaire {
+  background: transparent;
+  color: var(--texte-leger);
+  border: 1px solid var(--bord);
+}
+.btn-secondaire:hover:not(:disabled) {
+  border-color: var(--or);
+  color: var(--or-fonce);
+}
+.btn-plein {
+  width: 100%;
+  margin-top: 0.75rem;
+}
+.btn-lien {
+  background: none;
+  border: none;
+  color: var(--texte-leger);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1rem;
+}
+.btn-lien:hover {
+  color: var(--or-fonce);
+}
+
+/* ─── Sélection ──────────────────────────────────────────────────────────── */
+.selection-entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+.selection-entete .card-titre,
+.selection-entete .card-sous-titre {
+  margin-bottom: 0;
+}
+.selection-entete .btn {
+  flex-shrink: 0;
+}
+
+.chambres-grille {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.chambre-card {
+  background: var(--fond-carte);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  padding: 1.1rem 1.25rem;
+  box-shadow: var(--ombre);
+}
+.chambre-card-entete {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.chambre-numero {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+.chambre-badges {
+  display: flex;
+  gap: 0.4rem;
+}
+.chambre-tarif {
+  font-size: 1rem;
+  color: var(--texte);
+  margin-bottom: 0.25rem;
+}
+.chambre-tarif small {
+  font-size: 0.78rem;
+  color: var(--texte-leger);
+}
+.chambre-total {
+  font-size: 0.85rem;
+  color: var(--texte-leger);
+  margin-bottom: 0.5rem;
+}
+
+/* ─── Badges ─────────────────────────────────────────────────────────────── */
+.badge-etage,
+.badge-type {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.badge-etage {
+  background: #e8f4fd;
+  color: #1a6fa3;
+}
+.badge-type {
+  background: #f0e8fd;
+  color: #6a1ab3;
+}
+
+/* ─── Récap séjour ───────────────────────────────────────────────────────── */
+.recap-sejour {
+  background: #fdf8ed;
+  border: 1px solid #e8d8a0;
+  border-radius: var(--rayon);
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+}
+.recap-details {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.4rem 0;
+  font-size: 0.85rem;
+  color: var(--texte-leger);
+}
+.recap-montant {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  font-size: 0.95rem;
+  align-items: center;
+}
+.recap-montant strong {
+  font-size: 1.2rem;
+  color: var(--or-fonce);
+}
+
+/* ─── Instructions Mobile Money ──────────────────────────────────────────── */
+.mm-instructions {
+  background: #f0fdf4;
+  border: 1px solid #b7e7c9;
+  border-radius: var(--rayon);
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+  font-size: 0.9rem;
+}
+.mm-instructions h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--vert);
+}
+.mm-instructions ul {
+  padding-left: 1.2rem;
+  margin: 0.4rem 0;
+}
+.mm-instructions li {
+  margin-bottom: 0.2rem;
+}
+.mm-note {
+  margin-top: 0.5rem;
+  color: var(--texte-leger);
+  font-size: 0.82rem;
+}
+
+.paiement-section-titre {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+
+/* ─── Confirmation ───────────────────────────────────────────────────────── */
+.tower-card-confirmation {
+  text-align: center;
+}
+.confirmation-icone {
+  width: 3rem;
+  height: 3rem;
+  background: var(--vert);
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  margin: 0 auto 1rem;
+}
+.confirmation-details {
+  text-align: left;
+  background: var(--fond);
+  border-radius: var(--rayon);
+  padding: 1rem;
+  margin: 1.25rem 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+.confirmation-details dt {
+  color: var(--texte-leger);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.confirmation-details dd {
+  color: var(--texte);
+}
+.confirmation-note {
+  font-size: 0.85rem;
+  color: var(--texte-leger);
+  margin-bottom: 0.5rem;
+  line-height: 1.5;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  .selection-entete {
+    flex-direction: column;
+  }
+}

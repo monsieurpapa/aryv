@@ -31,6 +31,21 @@ export async function requireAuth(
     return;
   }
 
+  // Jeton de développement local — actif uniquement quand AUTH_ENFORCED=false.
+  if (process.env.AUTH_ENFORCED !== "true" && jeton === "dev-gerant") {
+    req.utilisateur = {
+      id: "dev",
+      nom: "Dev Gérant",
+      role: "gerant",
+      pinHash: null,
+      echecsPinConsecutifs: 0,
+      verrouilleJusqua: null,
+      creeLe: new Date(),
+    };
+    next();
+    return;
+  }
+
   let claims;
   try {
     const resultat = await supabase().auth.getClaims(jeton);
