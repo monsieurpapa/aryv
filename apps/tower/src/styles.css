@@ -1,16 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&display=swap');
+
 /* ─── Variables ─────────────────────────────────────────────────────────── */
 :root {
   --or: #c9a84c;
   --or-fonce: #a07930;
+  --or-clair: rgba(201, 168, 76, 0.12);
   --texte: #1a1a1a;
-  --texte-leger: #666;
+  --texte-leger: #6b6560;
   --fond: #f5f3ef;
   --fond-carte: #ffffff;
   --bord: #e0ddd6;
   --rouge: #c0392b;
   --vert: #27ae60;
-  --rayon: 8px;
-  --ombre: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --rayon: 10px;
+  --ombre: 0 2px 12px rgba(0, 0, 0, 0.07);
+  --ombre-hover: 0 4px 20px rgba(0, 0, 0, 0.12);
 }
 
 /* ─── Reset ──────────────────────────────────────────────────────────────── */
@@ -22,10 +26,11 @@
   padding: 0;
 }
 body {
-  font-family: system-ui, -apple-system, sans-serif;
+  font-family: 'DM Sans', 'Helvetica Neue', Arial, sans-serif;
   background: var(--fond);
   color: var(--texte);
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ─── Layout ─────────────────────────────────────────────────────────────── */
@@ -36,33 +41,38 @@ body {
 }
 
 .tower-header {
-  background: #1a1208;
+  background: linear-gradient(160deg, #1a1208 0%, #2a1e0a 100%);
   color: #fff;
-  padding: 1.25rem 1rem;
+  padding: 2rem 1rem 1.75rem;
   text-align: center;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.2);
 }
 .tower-header-inner {
   max-width: 600px;
   margin: 0 auto;
 }
 .tower-logo {
-  font-size: 1.6rem;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 2rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   color: var(--or);
+  text-shadow: 0 1px 8px rgba(201, 168, 76, 0.25);
 }
 .tower-tagline {
-  font-size: 0.82rem;
-  color: #bbb;
-  margin-top: 0.25rem;
-  letter-spacing: 0.02em;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 0.4rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 300;
 }
 
 .tower-main {
   flex: 1;
-  max-width: 600px;
+  max-width: 640px;
   margin: 0 auto;
-  padding: 1.5rem 1rem;
+  padding: 2rem 1rem;
   width: 100%;
 }
 
@@ -91,19 +101,21 @@ body {
   background: var(--fond-carte);
   border: 1px solid var(--bord);
   border-radius: var(--rayon);
-  padding: 1.5rem;
+  padding: 1.75rem;
   box-shadow: var(--ombre);
+  transition: box-shadow 0.2s ease;
 }
 
 .card-titre {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 0.25rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+  letter-spacing: -0.01em;
 }
 .card-sous-titre {
   color: var(--texte-leger);
-  font-size: 0.9rem;
-  margin-bottom: 1.25rem;
+  font-size: 0.875rem;
+  margin-bottom: 1.5rem;
 }
 
 /* ─── Formulaire ─────────────────────────────────────────────────────────── */
@@ -124,17 +136,24 @@ body {
 }
 .form-input {
   width: 100%;
-  padding: 0.6rem 0.75rem;
+  padding: 0.75rem 0.875rem;
   border: 1px solid var(--bord);
   border-radius: var(--rayon);
   font-size: 1rem;
+  font-family: inherit;
   color: var(--texte);
   background: #fff;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  min-height: 44px;
 }
 .form-input:focus {
   outline: none;
   border-color: var(--or);
+  box-shadow: 0 0 0 3px var(--or-clair);
+}
+.form-input:focus-visible {
+  outline: 2px solid var(--or);
+  outline-offset: 1px;
 }
 .form-hint {
   display: block;
@@ -148,22 +167,29 @@ body {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.625rem;
 }
 .radio-option {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.45rem 0.9rem;
-  border: 1px solid var(--bord);
+  padding: 0.55rem 1rem;
+  border: 1.5px solid var(--bord);
   border-radius: 999px;
   font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
   color: var(--texte-leger);
+  min-height: 36px;
+  user-select: none;
 }
 .radio-option input {
   display: none;
+}
+.radio-option:hover {
+  border-color: #c5bfb6;
+  color: var(--texte);
 }
 .radio-option.actif {
   border-color: var(--or);
@@ -177,18 +203,25 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.65rem 1.25rem;
+  padding: 0.75rem 1.375rem;
   border-radius: var(--rayon);
   font-size: 0.95rem;
+  font-family: inherit;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
   border: none;
   text-decoration: none;
+  min-height: 44px;
+  letter-spacing: 0.01em;
 }
 .btn:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
+}
+.btn:focus-visible {
+  outline: 2px solid var(--or);
+  outline-offset: 2px;
 }
 .btn-primaire {
   background: var(--or);
@@ -196,11 +229,17 @@ body {
 }
 .btn-primaire:hover:not(:disabled) {
   background: var(--or-fonce);
+  box-shadow: 0 4px 12px rgba(160, 121, 48, 0.35);
+}
+.btn-primaire:active:not(:disabled) {
+  background: #8a6828;
+  box-shadow: none;
+  transform: translateY(1px);
 }
 .btn-secondaire {
   background: transparent;
   color: var(--texte-leger);
-  border: 1px solid var(--bord);
+  border: 1.5px solid var(--bord);
 }
 .btn-secondaire:hover:not(:disabled) {
   border-color: var(--or);
@@ -208,16 +247,17 @@ body {
 }
 .btn-plein {
   width: 100%;
-  margin-top: 0.75rem;
+  margin-top: 1rem;
 }
 .btn-lien {
   background: none;
   border: none;
   color: var(--texte-leger);
-  font-size: 0.85rem;
+  font-size: 0.875rem;
+  font-family: inherit;
   cursor: pointer;
-  padding: 0;
-  margin-bottom: 1rem;
+  padding: 0.25rem 0;
+  margin-bottom: 1.25rem;
 }
 .btn-lien:hover {
   color: var(--or-fonce);
@@ -250,6 +290,11 @@ body {
   border-radius: var(--rayon);
   padding: 1.1rem 1.25rem;
   box-shadow: var(--ombre);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.chambre-card:hover {
+  box-shadow: var(--ombre-hover);
+  border-color: #ccc9c2;
 }
 .chambre-card-entete {
   display: flex;
@@ -278,6 +323,37 @@ body {
   font-size: 0.85rem;
   color: var(--texte-leger);
   margin-bottom: 0.5rem;
+}
+
+/* ─── Info strip (below search card) ────────────────────────────────────── */
+.tower-info-strip {
+  display: flex;
+  gap: 0;
+  margin-top: 1.25rem;
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  overflow: hidden;
+  background: var(--fond-carte);
+  box-shadow: var(--ombre);
+}
+.tower-info-item {
+  flex: 1;
+  padding: 1rem 0.75rem;
+  text-align: center;
+  border-right: 1px solid var(--bord);
+  font-size: 0.8rem;
+  color: var(--texte-leger);
+  line-height: 1.4;
+}
+.tower-info-item:last-child {
+  border-right: none;
+}
+.tower-info-item strong {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--texte);
+  margin-bottom: 0.2rem;
 }
 
 /* ─── Badges ─────────────────────────────────────────────────────────────── */
