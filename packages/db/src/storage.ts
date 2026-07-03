@@ -267,6 +267,20 @@ export const storage = {
     return conflits.length === 0;
   },
 
+  async chambresIndisponiblesIds(debut: Date, fin: Date): Promise<number[]> {
+    const conflits = await db()
+      .selectDistinct({ chambreId: schema.reservations.chambreId })
+      .from(schema.reservations)
+      .where(
+        and(
+          inArray(schema.reservations.statut, [...STATUTS_ACTIFS]),
+          lt(schema.reservations.arrivee, fin),
+          gt(schema.reservations.depart, debut),
+        ),
+      );
+    return conflits.map((c) => c.chambreId);
+  },
+
   async creerReservation(donnees: schema.NouvelleReservation, acteurId?: string) {
     const libre = await this.chambreDisponible(
       donnees.chambreId,
