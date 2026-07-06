@@ -15,6 +15,13 @@
       "when": 1782278063049,
       "tag": "0001_dapper_quentin_quire",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783290681218,
+      "tag": "0002_groovy_tarantula",
+      "breakpoints": true
     }
   ]
 }

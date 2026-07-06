@@ -1,5 +1,7 @@
-import type { ChambreDTO, TypeSejour } from "@aryv/shared";
+import type { ChambreDTO, ParametresTarificationDTO, TypeSejour } from "@aryv/shared";
 
+// Pas de montant : le serveur le calcule à partir des tarifs de la chambre
+// et de la majoration week-end (le prix affiché n'est qu'une prévisualisation).
 export interface DonneesReservation {
   telephone: string;
   nom?: string;
@@ -7,7 +9,6 @@ export interface DonneesReservation {
   typeSejour: TypeSejour;
   arrivee: string;
   depart: string;
-  montant: string;
   refPaiement?: string;
 }
 
@@ -27,6 +28,17 @@ export async function rechercherChambres(debut: string, fin: string): Promise<Ch
   const r = await fetch(`/api/disponibilites?${params}`);
   if (!r.ok) throw new Error("Erreur lors de la recherche des chambres");
   return r.json() as Promise<ChambreDTO[]>;
+}
+
+/** Paramètres de tarification publics (majoration week-end) ; 0 en cas d'échec. */
+export async function obtenirTarifs(): Promise<ParametresTarificationDTO> {
+  try {
+    const r = await fetch("/api/tarifs");
+    if (!r.ok) return { majorationWeekendPct: 0 };
+    return (await r.json()) as ParametresTarificationDTO;
+  } catch {
+    return { majorationWeekendPct: 0 };
+  }
 }
 
 export async function creerReservation(donnees: DonneesReservation): Promise<ReservationCreee> {

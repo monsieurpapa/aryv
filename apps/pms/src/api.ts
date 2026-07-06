@@ -1,6 +1,7 @@
 import type {
   AuditLogDTO,
   ChambreDTO,
+  ParametresTarificationDTO,
   RapportRecettesDTO,
   ReservationDTO,
   StatutChambre,
@@ -64,7 +65,7 @@ export const api = {
     typeSejour: string;
     arrivee: string;
     depart: string;
-    montant: string;
+    montant?: string; // absent → calcul serveur (tarifs + majoration week-end)
     refPaiement?: string;
   }) =>
     requete<ReservationDTO>("/api/reservations", {
@@ -113,6 +114,19 @@ export const api = {
     requete<RapportRecettesDTO>(
       `/api/rapports?debut=${debut}&fin=${fin}`,
     ),
+
+  // Tarification (module « Tarification flexible »).
+  obtenirTarifs: () => requete<ParametresTarificationDTO>("/api/tarifs"),
+
+  /** Gérant uniquement — met à jour les tarifs par type et/ou la majoration week-end. */
+  modifierTarifs: (donnees: {
+    majorationWeekendPct?: number;
+    tarifs?: { type: "grande" | "petite"; tarifNuitee: number; tarifRepos: number }[];
+  }) =>
+    requete<ParametresTarificationDTO>("/api/tarifs", {
+      method: "PATCH",
+      body: JSON.stringify(donnees),
+    }),
 
   // Journal d'audit (D14 — gérant uniquement, plage de dates paginée).
   listerAuditLog: (debut: string, fin: string, page: number) =>

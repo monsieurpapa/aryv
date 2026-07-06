@@ -47,6 +47,16 @@ export const chambres = pgTable("chambres", {
   creeLe: timestamp("cree_le").notNull().defaultNow(),
 });
 
+// Paramètres de tarification globaux (module « Tarification flexible ») —
+// ligne unique (id = 1, imposé par upsert dans storage). Les tarifs de base
+// restent portés par chaque chambre (tarif_nuitee / tarif_repos) ; ici ne
+// vivent que les règles transverses, comme la majoration week-end.
+export const parametresTarification = pgTable("parametres_tarification", {
+  id: integer("id").primaryKey(),
+  majorationWeekendPct: integer("majoration_weekend_pct").notNull().default(0),
+  majLe: timestamp("maj_le").notNull().defaultNow(),
+});
+
 // L'identité client est le numéro de téléphone — une identité pour tous les étages.
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
@@ -134,6 +144,7 @@ export const auditLogArchive = pgTable("audit_log_archive", {
 });
 
 export type Chambre = typeof chambres.$inferSelect;
+export type ParametresTarification = typeof parametresTarification.$inferSelect;
 export type Client = typeof clients.$inferSelect;
 export type Reservation = typeof reservations.$inferSelect;
 export type NouvelleReservation = typeof reservations.$inferInsert;

@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ChambreDTO } from "@aryv/shared";
-import { formaterMontant } from "@aryv/shared";
+import { calculerMontantSejour, formaterMontant } from "@aryv/shared";
 import { api } from "./api";
 import { ajouterJours, cleJour } from "./dates";
 
@@ -13,6 +13,25 @@ interface Props {
 
 type ModeSejour = "repos" | "nuitee";
 
+// Repos : 06h → 18h le même jour. Nuitée(s) : 12h → 10h le jour du départ.
+function periodeSejour(arrivee: string, mode: ModeSejour, nuits: number) {
+  const jourArrivee = new Date(`${arrivee}T00:00:00`);
+  let dateArrivee: Date;
+  let dateDepart: Date;
+  if (mode === "repos") {
+    dateArrivee = new Date(jourArrivee);
+    dateArrivee.setHours(6, 0, 0, 0);
+    dateDepart = new Date(jourArrivee);
+    dateDepart.setHours(18, 0, 0, 0);
+  } else {
+    dateArrivee = new Date(jourArrivee);
+    dateArrivee.setHours(12, 0, 0, 0);
+    dateDepart = ajouterJours(jourArrivee, Math.max(1, nuits));
+    dateDepart.setHours(10, 0, 0, 0);
+  }
+  return { dateArrivee, dateDepart };
+}
+
 export function ModalReservation({ chambre, jour, onFermer, onCree }: Props) {
   const [telephone, setTelephone] = useState("");
   const [nom, setNom] = useState("");
@@ -24,10 +43,27 @@ export function ModalReservation({ chambre, jour, onFermer, onCree }: Props) {
   const [erreur, setErreur] = useState<string | null>(null);
   const [envoiEnCours, setEnvoiEnCours] = useState(false);
 
+  // Majoration week-end : chargée pour que le montant proposé colle au prix
+  // que le serveur calculerait ; 0 si la requête échoue (le gérant peut
+  // toujours corriger le montant à la main).
+  const [majorationWeekendPct, setMajorationWeekendPct] = useState(0);
+  useEffect(() => {
+    api
+      .obtenirTarifs()
+      .then((t) => setMajorationWeekendPct(t.majorationWeekendPct))
+      .catch(() => {});
+  }, []);
+
   const montantAuto = useMemo(() => {
-    if (mode === "repos") return Number(chambre.tarifRepos);
-    return Number(chambre.tarifNuitee) * Math.max(1, nuits);
-  }, [mode, nuits, chambre]);
+    const { dateArrivee, dateDepart } = periodeSejour(arrivee, mode, nuits);
+    return calculerMontantSejour(
+      chambre,
+      mode === "repos" ? "repos" : nuits > 1 ? "multi" : "nuitee",
+      dateArrivee,
+      dateDepart,
+      majorationWeekendPct,
+    );
+  }, [arrivee, mode, nuits, chambre, majorationWeekendPct]);
 
   const montant = montantPerso ?? String(montantAuto);
 
@@ -39,21 +75,7 @@ export function ModalReservation({ chambre, jour, onFermer, onCree }: Props) {
       return;
     }
 
-    // Repos : 06h → 18h le même jour. Nuitée(s) : 12h → 10h le jour du départ.
-    const jourArrivee = new Date(`${arrivee}T00:00:00`);
-    let dateArrivee: Date;
-    let dateDepart: Date;
-    if (mode === "repos") {
-      dateArrivee = new Date(jourArrivee);
-      dateArrivee.setHours(6, 0, 0, 0);
-      dateDepart = new Date(jourArrivee);
-      dateDepart.setHours(18, 0, 0, 0);
-    } else {
-      dateArrivee = new Date(jourArrivee);
-      dateArrivee.setHours(12, 0, 0, 0);
-      dateDepart = ajouterJours(jourArrivee, Math.max(1, nuits));
-      dateDepart.setHours(10, 0, 0, 0);
-    }
+    const { dateArrivee, dateDepart } = periodeSejour(arrivee, mode, nuits);
 
     setEnvoiEnCours(true);
     try {
@@ -82,6 +104,7 @@ export function ModalReservation({ chambre, jour, onFermer, onCree }: Props) {
           {chambre.type === "grande" ? "Grande chambre" : "Petite chambre"} ·
           étage {chambre.etage} · nuitée {formaterMontant(chambre.tarifNuitee)} ·
           repos {formaterMontant(chambre.tarifRepos)}
+          {majorationWeekendPct > 0 && <> · week-end +{majorationWeekendPct} %</>}
         </p>
 
         <form onSubmit={soumettre}>
@@ -131,7 +154,11 @@ export function ModalReservation({ chambre, jour, onFermer, onCree }: Props) {
                 type="date"
                 value={arrivee}
                 min={cleJour(new Date())}
-                onChange={(e) => setArrivee(e.target.value)}
+                onChange={(e) => {
+                  setArrivee(e.target.value);
+                  // La date influe désormais sur le prix (majoration week-end).
+                  setMontantPerso(null);
+                }}
               />
             </div>
             {mode === "nuitee" && (

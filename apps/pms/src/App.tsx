@@ -12,11 +12,12 @@ import { PinConfirm, type ResultatPin } from "./PinConfirm";
 import { Equipe } from "./Equipe";
 import { JournalAudit } from "./JournalAudit";
 import { Rapports } from "./Rapports";
+import { Tarifs } from "./Tarifs";
 import { deconnecter, supabase } from "./auth";
 
 const NB_JOURS = 14;
 
-type Vue = "calendrier" | "menage" | "equipe" | "journal" | "rapports";
+type Vue = "calendrier" | "menage" | "equipe" | "journal" | "rapports" | "tarifs";
 
 const FMT_HEURE = new Intl.DateTimeFormat("fr-FR", {
   hour: "2-digit",
@@ -53,25 +54,31 @@ export function App() {
 
   useEffect(() => {
     definirGestionnaire401(() => setConnecte(false));
-    supabase.auth.getSession().then(({ data }) => setConnecte(!!data.session));
-    const { data: abonnement } = supabase.auth.onAuthStateChange((_event, session) => {
-      setConnecte(!!session);
-      // Lève le verrouillage PIN à chaque connexion réussie (D6) et
-      // récupère le rôle (pour l'onglet Équipe, gérant uniquement) et le
-      // nom (pour le toast/badge de confirmation, T9).
-      if (session) {
-        void api
-          .obtenirMoi()
-          .then((moi) => {
-            setRole(moi.role);
-            setNom(moi.nom);
-          })
-          .catch(() => {});
-      } else {
-        setRole(null);
-        setNom(null);
-      }
-    });
+    // Annotations explicites : `supabase` est typé any (client réel ou mock
+    // de dev), les paramètres des callbacks n'ont donc pas de type contextuel.
+    supabase.auth
+      .getSession()
+      .then(({ data }: { data: { session: unknown } }) => setConnecte(!!data.session));
+    const { data: abonnement } = supabase.auth.onAuthStateChange(
+      (_event: string, session: unknown) => {
+        setConnecte(!!session);
+        // Lève le verrouillage PIN à chaque connexion réussie (D6) et
+        // récupère le rôle (pour l'onglet Équipe, gérant uniquement) et le
+        // nom (pour le toast/badge de confirmation, T9).
+        if (session) {
+          void api
+            .obtenirMoi()
+            .then((moi) => {
+              setRole(moi.role);
+              setNom(moi.nom);
+            })
+            .catch(() => {});
+        } else {
+          setRole(null);
+          setNom(null);
+        }
+      },
+    );
     return () => abonnement.subscription.unsubscribe();
   }, []);
 
@@ -171,6 +178,7 @@ export function App() {
                 equipe: "Équipe",
                 journal: "Journal d'audit",
                 rapports: "Rapports & Caisse",
+                tarifs: "Tarification",
               }[vue]
             }
           </h1>
@@ -217,6 +225,14 @@ export function App() {
               onClick={() => setVue("rapports")}
             >
               Rapports
+            </button>
+          )}
+          {role === "gerant" && (
+            <button
+              className={vue === "tarifs" ? "actif" : ""}
+              onClick={() => setVue("tarifs")}
+            >
+              Tarifs
             </button>
           )}
           <button className="btn-secondaire" onClick={() => deconnecter()}>
@@ -280,6 +296,8 @@ export function App() {
         <JournalAudit />
       ) : vue === "rapports" ? (
         <Rapports />
+      ) : vue === "tarifs" ? (
+        <Tarifs />
       ) : (
         <Equipe />
       )}

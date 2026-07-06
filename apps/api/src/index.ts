@@ -7,6 +7,7 @@ import { disponibilitesRouter } from "./routes/disponibilites.js";
 import { utilisateursRouter } from "./routes/utilisateurs.js";
 import { auditLogRouter } from "./routes/audit-log.js";
 import { rapportsRouter } from "./routes/rapports.js";
+import { tarifsRouter } from "./routes/tarifs.js";
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use("/api/disponibilites", disponibilitesRouter);
 app.use("/api/utilisateurs", utilisateursRouter);
 app.use("/api/audit-log", auditLogRouter);
 app.use("/api/rapports", rapportsRouter);
+app.use("/api/tarifs", tarifsRouter);
 
 const port = Number(process.env.PORT ?? 3001);
 app.listen(port, () => {

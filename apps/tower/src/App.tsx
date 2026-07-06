@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ChambreDTO, TypeSejour } from "@aryv/shared";
-import { formaterMontant, normaliserTelephone } from "@aryv/shared";
-import { rechercherChambres, creerReservation } from "./api";
+import { calculerMontantSejour, formaterMontant, normaliserTelephone } from "@aryv/shared";
+import { rechercherChambres, creerReservation, obtenirTarifs } from "./api";
 import "./styles.css";
 
 type Etape = "recherche" | "selection" | "paiement" | "confirmation";
@@ -31,18 +31,22 @@ function toDepartISO(date: string, typeSejour: TypeSejour): string {
   return typeSejour === "repos" ? `${date}T22:00:00` : `${date}T10:00:00`;
 }
 
+// Prévisualisation du prix — même calcul (calculerMontantSejour) que celui
+// que le serveur ré-exécute à la réservation, majoration week-end comprise.
 function calculerMontant(
   chambre: ChambreDTO,
   typeSejour: TypeSejour,
   debut: string,
   fin: string,
+  majorationWeekendPct: number,
 ): number {
-  if (typeSejour === "repos") return Number(chambre.tarifRepos);
-  const ms =
-    new Date(toDepartISO(fin || debut, typeSejour)).getTime() -
-    new Date(toArriveeISO(debut)).getTime();
-  const nuits = Math.max(1, Math.ceil(ms / (24 * 60 * 60 * 1000)));
-  return Number(chambre.tarifNuitee) * nuits;
+  return calculerMontantSejour(
+    chambre,
+    typeSejour,
+    new Date(toArriveeISO(debut)),
+    new Date(toDepartISO(fin || debut, typeSejour)),
+    majorationWeekendPct,
+  );
 }
 
 function formaterDateFr(isoString: string): string {
@@ -156,11 +160,13 @@ function EtapeRecherche({
 function EtapeSelection({
   chambres,
   recherche,
+  majorationWeekendPct,
   onChoisir,
   onRetour,
 }: {
   chambres: ChambreDTO[];
   recherche: Recherche;
+  majorationWeekendPct: number;
   onChoisir: (c: ChambreDTO) => void;
   onRetour: () => void;
 }) {
@@ -209,7 +215,13 @@ function EtapeSelection({
       <div className="chambres-grille">
         {chambres.map((c) => {
           const finEff = recherche.typeSejour === "repos" ? recherche.debut : recherche.fin;
-          const montant = calculerMontant(c, recherche.typeSejour, recherche.debut, finEff);
+          const montant = calculerMontant(
+            c,
+            recherche.typeSejour,
+            recherche.debut,
+            finEff,
+            majorationWeekendPct,
+          );
           return (
             <div key={c.id} className="chambre-card">
               <div className="chambre-card-entete">
@@ -247,6 +259,7 @@ function EtapeSelection({
 function EtapePaiement({
   chambre,
   recherche,
+  majorationWeekendPct,
   telephone,
   nom,
   refPaiement,
@@ -259,6 +272,7 @@ function EtapePaiement({
 }: {
   chambre: ChambreDTO;
   recherche: Recherche;
+  majorationWeekendPct: number;
   telephone: string;
   nom: string;
   refPaiement: string;
@@ -270,7 +284,13 @@ function EtapePaiement({
   onRetour: () => void;
 }) {
   const finEff = recherche.typeSejour === "repos" ? recherche.debut : recherche.fin;
-  const montant = calculerMontant(chambre, recherche.typeSejour, recherche.debut, finEff);
+  const montant = calculerMontant(
+    chambre,
+    recherche.typeSejour,
+    recherche.debut,
+    finEff,
+    majorationWeekendPct,
+  );
   const chiffres = telephone.replace(/\D/g, "");
   const telNormalise = chiffres.length >= 9 ? normaliserTelephone(telephone) : "";
 
@@ -426,6 +446,11 @@ export function App() {
   const [confirmationData, setConfirmationData] = useState<ConfirmationData | null>(null);
   const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
+  const [majorationWeekendPct, setMajorationWeekendPct] = useState(0);
+
+  useEffect(() => {
+    void obtenirTarifs().then((t) => setMajorationWeekendPct(t.majorationWeekendPct));
+  }, []);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -471,7 +496,6 @@ export function App() {
     const finEff = recherche.typeSejour === "repos" ? recherche.debut : recherche.fin;
     const arriveeISO = toArriveeISO(recherche.debut);
     const departISO = toDepartISO(finEff, recherche.typeSejour);
-    const montant = calculerMontant(chambreChoisie, recherche.typeSejour, recherche.debut, finEff);
     setErreur(null);
     setChargement(true);
     try {
@@ -482,7 +506,6 @@ export function App() {
         typeSejour: recherche.typeSejour,
         arrivee: arriveeISO,
         depart: departISO,
-        montant: String(montant),
         refPaiement,
       });
       setConfirmationData({
@@ -490,7 +513,8 @@ export function App() {
         chambre: chambreChoisie,
         arriveeISO,
         departISO,
-        montant: String(montant),
+        // Montant renvoyé par le serveur — c'est lui qui fait foi.
+        montant: reservation.montant,
         refPaiement,
       });
       setEtape("confirmation");
@@ -565,6 +589,7 @@ export function App() {
           <EtapeSelection
             chambres={chambres}
             recherche={recherche}
+            majorationWeekendPct={majorationWeekendPct}
             onChoisir={(c) => {
               setChambreChoisie(c);
               setEtape("paiement");
@@ -581,6 +606,7 @@ export function App() {
           <EtapePaiement
             chambre={chambreChoisie}
             recherche={recherche}
+            majorationWeekendPct={majorationWeekendPct}
             telephone={telephone}
             nom={nom}
             refPaiement={refPaiement}
