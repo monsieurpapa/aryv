@@ -80,6 +80,71 @@ export interface RapportRecettesDTO {
   lignes: LigneRapportDTO[];
 }
 
+// --- Tarification (module « Tarification flexible », section A du budget) ---
+
+// Paramètres de tarification globaux, modifiables par le gérant dans le PMS.
+export interface ParametresTarificationDTO {
+  majorationWeekendPct: number; // 0–100, appliqué aux nuits/journées week-end
+}
+
+const JOUR_MS = 24 * 60 * 60 * 1000;
+// Goma est en UTC+2 (heure de Lubumbashi, sans heure d'été). Le jour de la
+// semaine d'une nuitée doit être celui vu par le client à Goma, pas celui du
+// fuseau du serveur (Railway tourne en UTC : samedi 00h00 à Goma est encore
+// vendredi 22h00 UTC).
+const FUSEAU_GOMA_MS = 2 * 60 * 60 * 1000;
+
+/** Jour de la semaine à Goma (0 = dimanche … 6 = samedi). */
+export function jourSemaineGoma(date: Date): number {
+  return new Date(date.getTime() + FUSEAU_GOMA_MS).getUTCDay();
+}
+
+/** Une nuitée est « week-end » si elle commence un vendredi ou un samedi. */
+export function estNuitWeekend(date: Date): boolean {
+  const jour = jourSemaineGoma(date);
+  return jour === 5 || jour === 6;
+}
+
+/** Un repos (journée) est « week-end » s'il tombe un samedi ou un dimanche. */
+export function estReposWeekend(date: Date): boolean {
+  const jour = jourSemaineGoma(date);
+  return jour === 6 || jour === 0;
+}
+
+function arrondir2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
+/**
+ * Montant d'un séjour, majoration week-end comprise. Fonction UNIQUE de
+ * calcul des prix : les frontends l'utilisent pour l'affichage et l'API la
+ * ré-exécute côté serveur — le montant envoyé par un navigateur n'est
+ * jamais la source de vérité pour les réservations publiques.
+ */
+export function calculerMontantSejour(
+  tarifs: { tarifNuitee: string | number; tarifRepos: string | number },
+  typeSejour: TypeSejour,
+  arrivee: Date,
+  depart: Date,
+  majorationWeekendPct: number,
+): number {
+  const facteur = 1 + majorationWeekendPct / 100;
+
+  if (typeSejour === "repos") {
+    const base = Number(tarifs.tarifRepos);
+    return arrondir2(estReposWeekend(arrivee) ? base * facteur : base);
+  }
+
+  const base = Number(tarifs.tarifNuitee);
+  const nuits = Math.max(1, Math.ceil((depart.getTime() - arrivee.getTime()) / JOUR_MS));
+  let total = 0;
+  for (let i = 0; i < nuits; i++) {
+    const nuit = new Date(arrivee.getTime() + i * JOUR_MS);
+    total += arrondir2(estNuitWeekend(nuit) ? base * facteur : base);
+  }
+  return arrondir2(total);
+}
+
 /** Formate un montant USD pour l'affichage (fr-CD). */
 export function formaterMontant(montant: number | string): string {
   return new Intl.NumberFormat("fr-CD", {

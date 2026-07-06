@@ -1,6 +1,10 @@
 import { Router } from "express";
 import { storage, ConflitReservation } from "@aryv/db";
-import { normaliserTelephone, type ReservationDTO } from "@aryv/shared";
+import {
+  calculerMontantSejour,
+  normaliserTelephone,
+  type ReservationDTO,
+} from "@aryv/shared";
 import { legacyAuth } from "../middleware/auth.js";
 
 export const reservationsRouter = Router();
@@ -44,10 +48,11 @@ reservationsRouter.get("/", legacyAuth("gerant", "reception"), async (req, res) 
 reservationsRouter.post("/", legacyAuth("gerant", "reception"), async (req, res) => {
   const { telephone, nom, chambreId, typeSejour, arrivee, depart, montant, refPaiement } =
     req.body;
-  if (!telephone || !chambreId || !typeSejour || !arrivee || !depart || !montant) {
+  // montant optionnel : absent → calcul serveur (tarifs chambre + majoration
+  // week-end). Fourni → prix négocié par le personnel (authentifié, audité).
+  if (!telephone || !chambreId || !typeSejour || !arrivee || !depart) {
     res.status(400).json({
-      erreur:
-        "Champs requis : telephone, chambreId, typeSejour, arrivee, depart, montant",
+      erreur: "Champs requis : telephone, chambreId, typeSejour, arrivee, depart",
     });
     return;
   }
@@ -62,6 +67,25 @@ reservationsRouter.post("/", legacyAuth("gerant", "reception"), async (req, res)
     return;
   }
 
+  let montantFinal: string;
+  if (montant !== undefined && montant !== null && montant !== "") {
+    montantFinal = String(montant);
+  } else {
+    const chambre = await storage.obtenirChambre(Number(chambreId));
+    if (!chambre) {
+      res.status(404).json({ erreur: "Chambre introuvable" });
+      return;
+    }
+    const majorationWeekendPct = await storage.obtenirMajorationWeekendPct();
+    montantFinal = calculerMontantSejour(
+      chambre,
+      typeSejour,
+      dateArrivee,
+      dateDepart,
+      majorationWeekendPct,
+    ).toFixed(2);
+  }
+
   const client = await storage.trouverOuCreerClient(
     normaliserTelephone(telephone),
     nom,
@@ -74,7 +98,7 @@ reservationsRouter.post("/", legacyAuth("gerant", "reception"), async (req, res)
         typeSejour,
         arrivee: dateArrivee,
         depart: dateDepart,
-        montant: String(montant),
+        montant: montantFinal,
         refPaiement: refPaiement || null,
       },
       req.utilisateur?.id,

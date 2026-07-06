@@ -138,6 +138,65 @@ export const storage = {
     });
   },
 
+  async obtenirChambre(id: number) {
+    return db().query.chambres.findFirst({
+      where: eq(schema.chambres.id, id),
+    });
+  },
+
+  // --- Tarification (module « Tarification flexible ») ---
+
+  /** Majoration week-end en % (0 si jamais configurée). */
+  async obtenirMajorationWeekendPct(): Promise<number> {
+    const ligne = await db().query.parametresTarification.findFirst();
+    return ligne?.majorationWeekendPct ?? 0;
+  },
+
+  /** Fixe la majoration week-end (gérant). Upsert sur la ligne unique id = 1. */
+  async definirMajorationWeekend(pct: number, acteurId: string) {
+    return db().transaction(async (tx) => {
+      await tx
+        .insert(schema.parametresTarification)
+        .values({ id: 1, majorationWeekendPct: pct, majLe: new Date() })
+        .onConflictDoUpdate({
+          target: schema.parametresTarification.id,
+          set: { majorationWeekendPct: pct, majLe: new Date() },
+        });
+      await enregistrerAudit(tx, {
+        acteurId,
+        action: "tarification.majoration_weekend",
+        entiteType: "tarification",
+        details: { majorationWeekendPct: pct },
+      });
+    });
+  },
+
+  /**
+   * Applique de nouveaux tarifs de base à TOUTES les chambres d'un type
+   * (grande/petite). Renvoie le nombre de chambres mises à jour.
+   */
+  async modifierTarifsParType(
+    type: (typeof schema.typeChambre.enumValues)[number],
+    tarifNuitee: string,
+    tarifRepos: string,
+    acteurId: string,
+  ): Promise<number> {
+    return db().transaction(async (tx) => {
+      const lignes = await tx
+        .update(schema.chambres)
+        .set({ tarifNuitee, tarifRepos })
+        .where(eq(schema.chambres.type, type))
+        .returning({ id: schema.chambres.id });
+      await enregistrerAudit(tx, {
+        acteurId,
+        action: "tarification.tarifs",
+        entiteType: "tarification",
+        details: { type, tarifNuitee, tarifRepos, nbChambres: lignes.length },
+      });
+      return lignes.length;
+    });
+  },
+
   // --- Utilisateurs (personnel) ---
   async obtenirUtilisateur(id: string) {
     return db().query.utilisateurs.findFirst({

@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { chambres } from "./schema.js";
+import { chambres, utilisateurs } from "./schema.js";
 
 // 24 chambres : étages 1–4, 6 par étage — 2 grandes (x01, x02) et 4 petites.
 // Tarifs USD : grande 50 $/nuitée, 25 $/repos · petite 30 $/nuitée, 15 $/repos.
@@ -29,6 +29,16 @@ async function seed() {
     .returning({ numero: chambres.numero });
 
   console.log(`${inserees.length} chambre(s) créée(s) sur ${lignes.length}.`);
+
+  // Profil du jeton de dev "dev-gerant" (voir apps/api middleware/auth.ts) :
+  // les mutations auditées référencent utilisateurs.id, la ligne doit donc
+  // exister aussi en local. Inerte en production — l'auth réelle passe par
+  // un JWT Supabase vérifié, dont le sub ne sera jamais "dev".
+  await db
+    .insert(utilisateurs)
+    .values({ id: "dev", nom: "Dev Gérant", role: "gerant" })
+    .onConflictDoNothing({ target: utilisateurs.id });
+
   await client.end();
 }
 

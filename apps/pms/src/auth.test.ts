@@ -74,16 +74,22 @@ describe("jetonActuel", () => {
   });
 });
 
-describe("garde des variables d'environnement (code quality review)", () => {
-  it("lève une erreur claire quand VITE_SUPABASE_URL est manquant", async () => {
+// Depuis l'infra de dev locale (chore/local-dev-infra), l'absence des
+// variables Supabase ne lève plus d'erreur : le module bascule en mode
+// développement avec une session gérant simulée (jeton "dev-gerant" reconnu
+// par l'API uniquement quand AUTH_ENFORCED=false).
+describe("mode développement sans variables Supabase", () => {
+  it("fournit le jeton dev-gerant quand VITE_SUPABASE_URL est manquant", async () => {
     vi.stubEnv("VITE_SUPABASE_URL", "");
 
-    await expect(import("./auth.js")).rejects.toThrow(/VITE_SUPABASE_URL/);
+    const { jetonActuel } = await import("./auth.js");
+    expect(await jetonActuel()).toBe("dev-gerant");
   });
 
-  it("lève une erreur claire quand VITE_SUPABASE_ANON_KEY est manquant", async () => {
+  it("fournit le jeton dev-gerant quand VITE_SUPABASE_ANON_KEY est manquant", async () => {
     vi.stubEnv("VITE_SUPABASE_ANON_KEY", "");
 
-    await expect(import("./auth.js")).rejects.toThrow(/VITE_SUPABASE_ANON_KEY/);
+    const { jetonActuel } = await import("./auth.js");
+    expect(await jetonActuel()).toBe("dev-gerant");
   });
 });
