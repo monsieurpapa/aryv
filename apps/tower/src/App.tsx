@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ChambreDTO, TypeSejour } from "@aryv/shared";
 import { calculerMontantSejour, formaterMontant, normaliserTelephone } from "@aryv/shared";
 import { rechercherChambres, creerReservation, obtenirTarifs } from "./api";
@@ -66,6 +66,41 @@ function BadgeEtage({ etage }: { etage: number }) {
 
 function BadgeType({ type }: { type: "grande" | "petite" }) {
   return <span className="badge-type">{type === "grande" ? "Grande" : "Petite"}</span>;
+}
+
+function Spinner() {
+  return <span className="spinner" aria-hidden="true" />;
+}
+
+const ETAPES_ORDRE: Etape[] = ["recherche", "selection", "paiement", "confirmation"];
+const ETAPES_LABELS: Record<Etape, string> = {
+  recherche: "Recherche",
+  selection: "Chambre",
+  paiement: "Paiement",
+  confirmation: "Confirmé",
+};
+
+function EtapeIndicateur({ etape }: { etape: Etape }) {
+  const indexActuel = ETAPES_ORDRE.indexOf(etape);
+  return (
+    <ol className="etapes-indicateur" aria-label="Progression de la réservation">
+      {ETAPES_ORDRE.map((e, i) => {
+        const statut = i < indexActuel ? "complete" : i === indexActuel ? "actif" : "a-venir";
+        return (
+          <li
+            key={e}
+            className={`etape-item etape-${statut}`}
+            aria-current={statut === "actif" ? "step" : undefined}
+          >
+            <span className="etape-puce" aria-hidden="true">
+              {statut === "complete" ? "✓" : i + 1}
+            </span>
+            <span className="etape-libelle">{ETAPES_LABELS[e]}</span>
+          </li>
+        );
+      })}
+    </ol>
+  );
 }
 
 function EtapeRecherche({
@@ -151,6 +186,7 @@ function EtapeRecherche({
         onClick={onSubmit}
         disabled={chargement}
       >
+        {chargement && <Spinner />}
         {chargement ? "Recherche en cours…" : "Voir les chambres disponibles"}
       </button>
     </div>
@@ -320,9 +356,14 @@ function EtapePaiement({
       <div className="mm-instructions">
         <h3>1. Effectuez le paiement Mobile Money</h3>
         <p>
-          Envoyez <strong>{formaterMontant(montant)}</strong> via M-Pesa, Airtel Money ou
-          Orange Money au numéro communiqué à la réception.
+          Envoyez <strong>{formaterMontant(montant)}</strong> au numéro communiqué à la
+          réception, via l'un de ces opérateurs :
         </p>
+        <div className="mm-chips">
+          <span className="mm-chip mm-chip-mpesa">M-Pesa</span>
+          <span className="mm-chip mm-chip-airtel">Airtel Money</span>
+          <span className="mm-chip mm-chip-orange">Orange Money</span>
+        </div>
         <p className="mm-note">Conservez la référence de transaction reçue par SMS.</p>
       </div>
 
@@ -379,12 +420,24 @@ function EtapePaiement({
       </div>
 
       <button
-        className="btn btn-primaire btn-plein"
+        className="btn btn-primaire btn-plein btn-confirmation-desktop"
         onClick={onSubmit}
         disabled={chargement}
       >
+        {chargement && <Spinner />}
         {chargement ? "Confirmation en cours…" : "Confirmer la réservation"}
       </button>
+
+      <div className="paiement-barre-mobile">
+        <div className="paiement-barre-montant">
+          <span>Total</span>
+          <strong>{formaterMontant(montant)}</strong>
+        </div>
+        <button className="btn btn-primaire" onClick={onSubmit} disabled={chargement}>
+          {chargement && <Spinner />}
+          {chargement ? "…" : "Confirmer"}
+        </button>
+      </div>
     </div>
   );
 }
@@ -451,6 +504,16 @@ export function App() {
   useEffect(() => {
     void obtenirTarifs().then((t) => setMajorationWeekendPct(t.majorationWeekendPct));
   }, []);
+
+  const contenuRef = useRef<HTMLDivElement>(null);
+  const premierRendu = useRef(true);
+  useEffect(() => {
+    if (premierRendu.current) {
+      premierRendu.current = false;
+      return;
+    }
+    contenuRef.current?.focus();
+  }, [etape]);
 
   const today = new Date().toISOString().split("T")[0];
 
@@ -552,79 +615,87 @@ export function App() {
         </div>
       </header>
 
-      <main className="tower-main">
+      <main
+        className={`tower-main${etape === "selection" ? " tower-main-large" : ""}${
+          etape === "paiement" ? " has-sticky-bar" : ""
+        }`}
+      >
+        <EtapeIndicateur etape={etape} />
+
         {erreur && (
           <div className="tower-alerte" role="alert">
             {erreur}
           </div>
         )}
 
-        {etape === "recherche" && (
-          <>
-            <EtapeRecherche
+        <div className="etape-contenu" key={etape} ref={contenuRef} tabIndex={-1}>
+          {etape === "recherche" && (
+            <>
+              <EtapeRecherche
+                recherche={recherche}
+                today={today}
+                chargement={chargement}
+                onChange={setRecherche}
+                onSubmit={chercher}
+              />
+              <div className="tower-info-strip" aria-hidden="true">
+                <div className="tower-info-item">
+                  <strong>Check-in</strong>
+                  14h00
+                </div>
+                <div className="tower-info-item">
+                  <strong>Check-out</strong>
+                  10h00
+                </div>
+                <div className="tower-info-item">
+                  <strong>Paiement</strong>
+                  Mobile Money
+                </div>
+              </div>
+            </>
+          )}
+
+          {etape === "selection" && (
+            <EtapeSelection
+              chambres={chambres}
               recherche={recherche}
-              today={today}
-              chargement={chargement}
-              onChange={setRecherche}
-              onSubmit={chercher}
+              majorationWeekendPct={majorationWeekendPct}
+              onChoisir={(c) => {
+                setChambreChoisie(c);
+                setEtape("paiement");
+                setErreur(null);
+              }}
+              onRetour={() => {
+                setEtape("recherche");
+                setErreur(null);
+              }}
             />
-            <div className="tower-info-strip" aria-hidden="true">
-              <div className="tower-info-item">
-                <strong>Check-in</strong>
-                14h00
-              </div>
-              <div className="tower-info-item">
-                <strong>Check-out</strong>
-                10h00
-              </div>
-              <div className="tower-info-item">
-                <strong>Paiement</strong>
-                Mobile Money
-              </div>
-            </div>
-          </>
-        )}
+          )}
 
-        {etape === "selection" && (
-          <EtapeSelection
-            chambres={chambres}
-            recherche={recherche}
-            majorationWeekendPct={majorationWeekendPct}
-            onChoisir={(c) => {
-              setChambreChoisie(c);
-              setEtape("paiement");
-              setErreur(null);
-            }}
-            onRetour={() => {
-              setEtape("recherche");
-              setErreur(null);
-            }}
-          />
-        )}
+          {etape === "paiement" && chambreChoisie && (
+            <EtapePaiement
+              chambre={chambreChoisie}
+              recherche={recherche}
+              majorationWeekendPct={majorationWeekendPct}
+              telephone={telephone}
+              nom={nom}
+              refPaiement={refPaiement}
+              chargement={chargement}
+              onTelephone={setTelephone}
+              onNom={setNom}
+              onRefPaiement={setRefPaiement}
+              onSubmit={confirmer}
+              onRetour={() => {
+                setEtape("selection");
+                setErreur(null);
+              }}
+            />
+          )}
 
-        {etape === "paiement" && chambreChoisie && (
-          <EtapePaiement
-            chambre={chambreChoisie}
-            recherche={recherche}
-            majorationWeekendPct={majorationWeekendPct}
-            telephone={telephone}
-            nom={nom}
-            refPaiement={refPaiement}
-            chargement={chargement}
-            onTelephone={setTelephone}
-            onNom={setNom}
-            onRefPaiement={setRefPaiement}
-            onSubmit={confirmer}
-            onRetour={() => {
-              setEtape("selection");
-              setErreur(null);
-            }}
-          />
-        )}
-
-        {etape === "confirmation" && confirmationData && (
-          <EtapeConfirmation data={confirmationData} onRecommencer={recommencer} />
-        )}
+          {etape === "confirmation" && confirmationData && (
+            <EtapeConfirmation data={confirmationData} onRecommencer={recommencer} />
+          )}
+        </div>
       </main>
 
       <footer className="tower-footer">
