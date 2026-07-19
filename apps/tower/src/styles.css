@@ -74,6 +74,10 @@ body {
   margin: 0 auto;
   padding: 2rem 1rem;
   width: 100%;
+  transition: max-width 0.2s ease;
+}
+.tower-main-large {
+  max-width: 1040px;
 }
 
 .tower-footer {
@@ -83,6 +87,96 @@ body {
   color: var(--texte-leger);
   border-top: 1px solid var(--bord);
   margin-top: auto;
+}
+
+/* ─── Indicateur d'étapes ────────────────────────────────────────────────── */
+.etapes-indicateur {
+  display: flex;
+  align-items: flex-start;
+  list-style: none;
+  margin-bottom: 1.75rem;
+}
+.etape-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  gap: 0.4rem;
+}
+.etape-item::before {
+  content: "";
+  position: absolute;
+  top: 0.9rem;
+  left: -50%;
+  width: 100%;
+  height: 2px;
+  background: var(--bord);
+  z-index: 0;
+}
+.etape-item:first-child::before {
+  content: none;
+}
+.etape-item.etape-complete::before {
+  background: var(--or);
+}
+.etape-puce {
+  position: relative;
+  z-index: 1;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: var(--fond-carte);
+  border: 2px solid var(--bord);
+  color: var(--texte-leger);
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.etape-libelle {
+  font-size: 0.72rem;
+  color: var(--texte-leger);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+.etape-item.etape-actif .etape-puce {
+  border-color: var(--or);
+  background: var(--or);
+  color: #fff;
+}
+.etape-item.etape-actif .etape-libelle {
+  color: var(--texte);
+  font-weight: 700;
+}
+.etape-item.etape-complete .etape-puce {
+  border-color: var(--or);
+  color: var(--or-fonce);
+  background: var(--or-clair);
+}
+
+/* ─── Transition de contenu d'étape ──────────────────────────────────────── */
+.etape-contenu {
+  outline: none;
+  animation: etape-entree 0.28s ease both;
+}
+@keyframes etape-entree {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .etape-contenu {
+    animation: none;
+  }
 }
 
 /* ─── Alerte ─────────────────────────────────────────────────────────────── */
@@ -185,11 +279,23 @@ body {
   user-select: none;
 }
 .radio-option input {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 .radio-option:hover {
   border-color: #c5bfb6;
   color: var(--texte);
+}
+.radio-option:has(input:focus-visible) {
+  outline: 2px solid var(--or);
+  outline-offset: 2px;
 }
 .radio-option.actif {
   border-color: var(--or);
@@ -222,6 +328,31 @@ body {
 .btn:focus-visible {
   outline: 2px solid var(--or);
   outline-offset: 2px;
+}
+.spinner {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  vertical-align: -0.15em;
+  animation: spinner-tourne 0.7s linear infinite;
+}
+.btn-secondaire .spinner {
+  border-color: rgba(107, 101, 96, 0.3);
+  border-top-color: var(--texte-leger);
+}
+@keyframes spinner-tourne {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 1.4s;
+  }
 }
 .btn-primaire {
   background: var(--or);
@@ -282,6 +413,7 @@ body {
 .chambres-grille {
   display: grid;
   gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
 
 .chambre-card {
@@ -424,6 +556,31 @@ body {
 .mm-instructions li {
   margin-bottom: 0.2rem;
 }
+.mm-chips {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.6rem;
+}
+.mm-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.01em;
+}
+.mm-chip-mpesa {
+  background: #4caf50;
+}
+.mm-chip-airtel {
+  background: #e2231a;
+}
+.mm-chip-orange {
+  background: #ff6600;
+}
 .mm-note {
   margin-top: 0.5rem;
   color: var(--texte-leger);
@@ -478,6 +635,11 @@ body {
   line-height: 1.5;
 }
 
+/* ─── Barre de confirmation mobile (étape paiement) ──────────────────────── */
+.paiement-barre-mobile {
+  display: none;
+}
+
 /* ─── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .form-row {
@@ -485,5 +647,44 @@ body {
   }
   .selection-entete {
     flex-direction: column;
+  }
+}
+
+@media (max-width: 640px) {
+  .has-sticky-bar {
+    padding-bottom: 5.5rem;
+  }
+  .btn-confirmation-desktop {
+    display: none;
+  }
+  .paiement-barre-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    background: var(--fond-carte);
+    border-top: 1px solid var(--bord);
+    padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.08);
+  }
+  .paiement-barre-montant {
+    display: flex;
+    flex-direction: column;
+    font-size: 0.75rem;
+    color: var(--texte-leger);
+    line-height: 1.3;
+  }
+  .paiement-barre-montant strong {
+    font-size: 1.15rem;
+    color: var(--texte);
+  }
+  .paiement-barre-mobile .btn {
+    flex-shrink: 0;
+    min-width: 9.5rem;
   }
 }
