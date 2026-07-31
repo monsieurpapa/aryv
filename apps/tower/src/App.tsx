@@ -72,6 +72,27 @@ function Spinner() {
   return <span className="spinner" aria-hidden="true" />;
 }
 
+function BoutonAction({
+  chargement,
+  label,
+  labelChargement,
+  className,
+  onClick,
+}: {
+  chargement: boolean;
+  label: string;
+  labelChargement: string;
+  className: string;
+  onClick: () => void;
+}) {
+  return (
+    <button className={className} onClick={onClick} disabled={chargement}>
+      {chargement && <Spinner />}
+      {chargement ? labelChargement : label}
+    </button>
+  );
+}
+
 const ETAPES_ORDRE: Etape[] = ["recherche", "selection", "paiement", "confirmation"];
 const ETAPES_LABELS: Record<Etape, string> = {
   recherche: "Recherche",
@@ -181,14 +202,13 @@ function EtapeRecherche({
         )}
       </div>
 
-      <button
+      <BoutonAction
+        chargement={chargement}
+        label="Voir les chambres disponibles"
+        labelChargement="Recherche en cours…"
         className="btn btn-primaire btn-plein"
         onClick={onSubmit}
-        disabled={chargement}
-      >
-        {chargement && <Spinner />}
-        {chargement ? "Recherche en cours…" : "Voir les chambres disponibles"}
-      </button>
+      />
     </div>
   );
 }
@@ -419,24 +439,26 @@ function EtapePaiement({
         </span>
       </div>
 
-      <button
+      <BoutonAction
+        chargement={chargement}
+        label="Confirmer la réservation"
+        labelChargement="Confirmation en cours…"
         className="btn btn-primaire btn-plein btn-confirmation-desktop"
         onClick={onSubmit}
-        disabled={chargement}
-      >
-        {chargement && <Spinner />}
-        {chargement ? "Confirmation en cours…" : "Confirmer la réservation"}
-      </button>
+      />
 
       <div className="paiement-barre-mobile">
         <div className="paiement-barre-montant">
           <span>Total</span>
           <strong>{formaterMontant(montant)}</strong>
         </div>
-        <button className="btn btn-primaire" onClick={onSubmit} disabled={chargement}>
-          {chargement && <Spinner />}
-          {chargement ? "…" : "Confirmer"}
-        </button>
+        <BoutonAction
+          chargement={chargement}
+          label="Confirmer"
+          labelChargement="…"
+          className="btn btn-primaire"
+          onClick={onSubmit}
+        />
       </div>
     </div>
   );
