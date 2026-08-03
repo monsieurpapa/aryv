@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import type { ChambreDTO, TypeSejour } from "@aryv/shared";
-import { calculerMontantSejour, formaterMontant, normaliserTelephone } from "@aryv/shared";
-import { rechercherChambres, creerReservation, obtenirTarifs } from "./api";
+import {
+  calculerMontantSejour,
+  construireLienWhatsApp,
+  formaterMontant,
+  normaliserTelephone,
+} from "@aryv/shared";
+import { rechercherChambres, creerReservation, obtenirConfig, obtenirTarifs } from "./api";
 import "./styles.css";
 
 type Etape = "recherche" | "selection" | "paiement" | "confirmation";
@@ -29,6 +34,29 @@ function toArriveeISO(date: string): string {
 
 function toDepartISO(date: string, typeSejour: TypeSejour): string {
   return typeSejour === "repos" ? `${date}T22:00:00` : `${date}T10:00:00`;
+}
+
+const LABEL_TYPE_SEJOUR: Record<TypeSejour, string> = {
+  nuitee: "nuitée",
+  repos: "repos (journée)",
+  multi: "multi-nuits",
+};
+
+// Message pré-rempli pour le lien wa.me — reprend les dates déjà saisies par
+// le client si disponibles, sinon un message générique (le client n'a pas
+// encore commencé sa recherche).
+function construireMessageWhatsApp(recherche: Recherche): string {
+  const base = "Bonjour, je voudrais réserver une chambre à ARYV Tower";
+  if (!recherche.debut) return `${base}.`;
+
+  const typeLabel = LABEL_TYPE_SEJOUR[recherche.typeSejour];
+  if (recherche.typeSejour === "repos") {
+    return `${base} le ${recherche.debut} (${typeLabel}).`;
+  }
+  if (!recherche.fin) {
+    return `${base} à partir du ${recherche.debut} (${typeLabel}).`;
+  }
+  return `${base} du ${recherche.debut} au ${recherche.fin} (${typeLabel}).`;
 }
 
 // Prévisualisation du prix — même calcul (calculerMontantSejour) que celui
@@ -128,12 +156,14 @@ function EtapeRecherche({
   recherche,
   today,
   chargement,
+  lienWhatsApp,
   onChange,
   onSubmit,
 }: {
   recherche: Recherche;
   today: string;
   chargement: boolean;
+  lienWhatsApp: string | null;
   onChange: (r: Recherche) => void;
   onSubmit: () => void;
 }) {
@@ -209,6 +239,22 @@ function EtapeRecherche({
         className="btn btn-primaire btn-plein"
         onClick={onSubmit}
       />
+
+      {lienWhatsApp && (
+        <>
+          <div className="separateur-ou" role="separator">
+            ou
+          </div>
+          <a
+            href={lienWhatsApp}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-whatsapp btn-plein"
+          >
+            Réserver via WhatsApp
+          </a>
+        </>
+      )}
     </div>
   );
 }
@@ -522,10 +568,16 @@ export function App() {
   const [chargement, setChargement] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
   const [majorationWeekendPct, setMajorationWeekendPct] = useState(0);
+  const [whatsappPhone, setWhatsappPhone] = useState<string | null>(null);
 
   useEffect(() => {
     void obtenirTarifs().then((t) => setMajorationWeekendPct(t.majorationWeekendPct));
+    void obtenirConfig().then((c) => setWhatsappPhone(c.whatsappPhone));
   }, []);
+
+  const lienWhatsApp = whatsappPhone
+    ? construireLienWhatsApp(whatsappPhone, construireMessageWhatsApp(recherche))
+    : null;
 
   const contenuRef = useRef<HTMLDivElement>(null);
   const premierRendu = useRef(true);
@@ -657,6 +709,7 @@ export function App() {
                 recherche={recherche}
                 today={today}
                 chargement={chargement}
+                lienWhatsApp={lienWhatsApp}
                 onChange={setRecherche}
                 onSubmit={chercher}
               />

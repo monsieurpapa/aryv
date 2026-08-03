@@ -1,4 +1,4 @@
-import type { ChambreDTO, ParametresTarificationDTO, TypeSejour } from "@aryv/shared";
+import type { ChambreDTO, ConfigPubliqueDTO, ParametresTarificationDTO, TypeSejour } from "@aryv/shared";
 
 // Pas de montant : le serveur le calcule à partir des tarifs de la chambre
 // et de la majoration week-end (le prix affiché n'est qu'une prévisualisation).
@@ -38,6 +38,17 @@ export async function obtenirTarifs(): Promise<ParametresTarificationDTO> {
     return (await r.json()) as ParametresTarificationDTO;
   } catch {
     return { majorationWeekendPct: 0 };
+  }
+}
+
+/** Configuration publique (numéro WhatsApp) ; null en cas d'échec. */
+export async function obtenirConfig(): Promise<ConfigPubliqueDTO> {
+  try {
+    const r = await fetch("/api/config");
+    if (!r.ok) return { whatsappPhone: null };
+    return (await r.json()) as ConfigPubliqueDTO;
+  } catch {
+    return { whatsappPhone: null };
   }
 }
 
