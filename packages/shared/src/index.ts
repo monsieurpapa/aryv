@@ -87,6 +87,12 @@ export interface ParametresTarificationDTO {
   majorationWeekendPct: number; // 0–100, appliqué aux nuits/journées week-end
 }
 
+// Configuration publique exposée aux frontends (GET /api/config) — aucune
+// donnée sensible, uniquement des valeurs dérivées de variables d'env.
+export interface ConfigPubliqueDTO {
+  whatsappPhone: string | null;
+}
+
 const JOUR_MS = 24 * 60 * 60 * 1000;
 // Goma est en UTC+2 (heure de Lubumbashi, sans heure d'été). Le jour de la
 // semaine d'une nuitée doit être celui vu par le client à Goma, pas celui du
@@ -159,4 +165,13 @@ export function normaliserTelephone(brut: string): string {
   if (chiffres.startsWith("243")) return `+${chiffres}`;
   if (chiffres.startsWith("0")) return `+243${chiffres.slice(1)}`;
   return `+243${chiffres}`;
+}
+
+/**
+ * Lien wa.me pré-rempli (réservation « phase 1 » — voir .env.example : un
+ * simple lien de conversation, pas l'API WhatsApp Business Cloud de phase 2).
+ */
+export function construireLienWhatsApp(telephone: string, message: string): string {
+  const chiffres = telephone.replace(/\D/g, "");
+  return `https://wa.me/${chiffres}?text=${encodeURIComponent(message)}`;
 }

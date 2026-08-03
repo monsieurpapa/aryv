@@ -6,10 +6,12 @@ import { App } from "./App";
 const rechercherChambres = vi.fn();
 const creerReservation = vi.fn();
 const obtenirTarifs = vi.fn();
+const obtenirConfig = vi.fn();
 vi.mock("./api", () => ({
   rechercherChambres: (...args: unknown[]) => rechercherChambres(...args),
   creerReservation: (...args: unknown[]) => creerReservation(...args),
   obtenirTarifs: (...args: unknown[]) => obtenirTarifs(...args),
+  obtenirConfig: (...args: unknown[]) => obtenirConfig(...args),
 }));
 
 const chambre: ChambreDTO = {
@@ -26,6 +28,7 @@ beforeEach(() => {
   rechercherChambres.mockReset();
   creerReservation.mockReset();
   obtenirTarifs.mockReset().mockResolvedValue({ majorationWeekendPct: 0 });
+  obtenirConfig.mockReset().mockResolvedValue({ whatsappPhone: "+243991234567" });
 });
 
 function remplirDates(debut: string, fin: string) {
@@ -64,8 +67,9 @@ describe("EtapeIndicateur", () => {
 });
 
 describe("Gestion du focus lors du changement d'étape", () => {
-  it("ne vole pas le focus au premier rendu", () => {
+  it("ne vole pas le focus au premier rendu", async () => {
     render(<App />);
+    await waitFor(() => expect(obtenirConfig).toHaveBeenCalled());
     const contenu = document.querySelector(".etape-contenu");
     expect(document.activeElement).not.toBe(contenu);
   });
@@ -113,6 +117,38 @@ describe("chercher() — validation", () => {
       ),
     );
     expect(rechercherChambres).not.toHaveBeenCalled();
+  });
+});
+
+describe("Lien WhatsApp (EtapeRecherche)", () => {
+  it("n'affiche pas le lien tant que le numéro WhatsApp n'est pas chargé", () => {
+    obtenirConfig.mockResolvedValue({ whatsappPhone: null });
+    render(<App />);
+    expect(screen.queryByText("Réserver via WhatsApp")).toBeNull();
+  });
+
+  it("affiche un message générique avant toute saisie de dates", async () => {
+    render(<App />);
+    const lien = await screen.findByText("Réserver via WhatsApp");
+    expect(lien.getAttribute("href")).toBe(
+      "https://wa.me/243991234567?text=" +
+        encodeURIComponent("Bonjour, je voudrais réserver une chambre à ARYV Tower."),
+    );
+  });
+
+  it("reprend les dates saisies dans le message pré-rempli", async () => {
+    render(<App />);
+    remplirDates("2026-08-10", "2026-08-12");
+
+    const lien = await screen.findByText("Réserver via WhatsApp");
+    await waitFor(() =>
+      expect(lien.getAttribute("href")).toBe(
+        "https://wa.me/243991234567?text=" +
+          encodeURIComponent(
+            "Bonjour, je voudrais réserver une chambre à ARYV Tower du 2026-08-10 au 2026-08-12 (nuitée).",
+          ),
+      ),
+    );
   });
 });
 

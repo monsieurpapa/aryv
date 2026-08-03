@@ -42,6 +42,7 @@ pnpm monorepo:
 | POST | `/api/reservations` | Create booking; finds-or-creates client by normalized phone; **409** if the room is taken on the period |
 | PATCH | `/api/reservations/:id/statut` | Status transition; **400** if not allowed by the state machine; updates the room status as a side effect |
 | GET | `/api/rapports?debut&fin` | Revenue report (gérant only); defaults to current month; returns totals (encaissé/attendu), breakdown by floor, and full booking list |
+| GET | `/api/config` | Public config for frontends (currently `{ whatsappPhone }` from `WHATSAPP_PHONE` env var); no auth, no secrets |
 
 ## Commands
 
