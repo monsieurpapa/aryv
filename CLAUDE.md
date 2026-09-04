@@ -8,6 +8,9 @@ Digital platform for **ARYV Tower**, a 5-story hospitality building in Goma, DRC
 
 All user-facing text is in **French**. Currency is USD; payments are Mobile Money first (M-Pesa, Airtel Money, Orange Money). Customer identity is the **phone number** — one identity across all floors.
 
+## Growth / Customer Acquisition
+Getting customers/GTM/launch questions → see the workspace-local `growth-playbook` skill (`.claude/skills/growth-playbook/SKILL.md`, referenced from the root `CLAUDE.md`).
+
 Reference documents live in `docs/` (bilingual budget + the owner PDF). The PMS scope and module list are defined in `docs/BUDGET-OUTILS-NUMERIQUES-FR.md` section A.
 
 ## Architecture
